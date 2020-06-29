@@ -1,0 +1,2 @@
+lxcSetup=standalone # two options (cluster, standalone)
+withBDC=no         # two options (yes, no)

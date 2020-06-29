@@ -1,0 +1,755 @@
+#!/bin/bash
+#
+source help/helpFunctions.sh
+source code/bucket_create_node.sh
+source code/bucket_create_client.sh
+source code/bucket_create_dtr.sh
+source code/bucket_create_k8s.sh
+source code/bucket_ns.sh
+source code/bucket_rope.sh
+source show/show-func.sh
+source code/bucket_k8sUI.sh
+source code/bucket_setup.sh
+source code/gen-helper-function.sh
+source code/bucket_gluster.sh
+source code/bucket_nfs.sh
+#
+nodename="default"
+bucket="default"
+nodecount=1
+os="centos"
+osv="7"
+namespace="default"
+profile="mini"
+mip="default"
+withbdc=0
+k8sVersion="1.14.2"
+nMaster=1
+nWorker=1
+cni="flannel"
+csi="local"
+dtr="shared"
+noClient=0
+withClient=0
+withVolume=0
+volumeGB=1
+hook="22"
+ropeType="ssh"
+ropename="default"
+snapname=
+no_expiry=
+stateful=
+finit=0;
+fprofile=0;
+ftemplate=0;
+fsall=0;
+fclient=0;
+fnode=0;
+fdtr=0;
+fk8s=0;
+ftall=0;
+fglust=0;
+glusterNode=1;
+cmd1=
+cmd2=
+cmd3=
+cmd4=
+while [ "$1" != "" ]; do
+    case $1 in
+        -v | --version )    show_version
+                            exit
+                            ;;
+        -h | --help )   help_bucket
+                        exit
+                        ;;
+        snapshot )  shift
+                    cmd1=$1
+                    case $cmd1 in
+                        -v | --version )    show_version
+                                            exit
+                                            ;;
+                        -h | --help )       show_help_snapshot
+                                            exit
+                                            ;;
+                        create )    shift        
+                                    cmd2=$1
+                                    case $cmd2 in
+                                        -v | --version )    show_version
+                                                            exit
+                                                            ;;
+                                        -h | --help )       show_help_snapshot_create
+                                                            exit
+                                                            ;;
+                                        * )                 namespace=$1
+                                                            shift
+                                                            snapname=$1
+                                                            shift
+                                                            cmd3=$1
+                                                            case $cmd3 in
+                                                                --no-expiry ) no_expiry=1
+                                                                              ;;
+                                                                --stateful ) stateful=1
+                                                                              ;;
+                                                                * )           show_help_snapshot
+                                                                              exit 1
+                                                            esac
+                                                            shift
+                                                            cmd4=$1
+                                                            case $cmd4 in
+                                                                --no-expiry ) no_expiry=1
+                                                                              ;;
+                                                                --stateful ) stateful=1
+                                                                              ;;
+                                                                * )           show_help_snapshot
+                                                                              exit 1
+                                                            esac
+                                                            snapshot_create $namespace $snapname $no_expiry stateful
+                                                            ;;
+                                    esac
+                                    shift
+                                    ;;
+                        delete )    shift        
+                                    cmd2=$1
+                                    case $cmd2 in
+                                        -v | --version )    show_version
+                                                            exit
+                                                            ;;
+                                        -h | --help )       show_help_snapshot_delete
+                                                            exit
+                                                            ;;
+                                        * )                 namespace=$1
+                                                            shift
+                                                            snapname=$1
+                                                            snapshot_delete $namespace $snapname
+                                                            ;;
+                                    esac
+                                    shift
+                                    ;;
+                        restore )   shift        
+                                    cmd2=$1
+                                    case $cmd2 in
+                                        -v | --version )    show_version
+                                                            exit
+                                                            ;;
+                                        -h | --help )       show_help_snapshot_restore
+                                                            exit
+                                                            ;;
+                                        * )                 namespace=$1
+                                                            shift
+                                                            snapname=$1
+                                                            snapshot_restore $namespace $snapname
+                                                            ;;
+                                    esac
+                                    shift
+                                    ;;
+                        list )      shift        
+                                    cmd2=$1
+                                    case $cmd2 in
+                                        -v | --version )    show_version
+                                                            exit
+                                                            ;;
+                                        -h | --help )       show_help_snapshot_list
+                                                            exit
+                                                            ;;
+                                        * )                 namespace=$1
+                                                            snapshot_list $namespace
+                                                            ;;
+                                    esac
+                                    shift
+                                    ;;
+                        * )         show_help_snapshot
+                                    exit 1
+                    esac
+                    shift
+                    ;;
+        create )    shift
+                    cmd1=$1
+                    case $cmd1 in
+                        -h | --help )       help_bucket_create
+                                            exit
+                                            ;;
+                        ns )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_create_ns
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                --name )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                * ) help_bucket_create_ns
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_ns $namespace 
+                        ;;
+                        node )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )       help_bucket_create_node
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                -c | --count )  shift  
+                                                    nodecount=$1
+                                                    ;;
+                                                -p | --profile )    shift
+                                                    profile=$1
+                                                    ;;
+                                                --os )  shift  
+                                                    os=$1
+                                                    ;;
+                                                -v | --osv )  shift  
+                                                    osv=$1
+                                                    ;;
+                                                --withClient )  withClient=1
+                                                    ;;
+                                                --withVolume )  withVolume=1
+                                                    ;;
+                                                --volumeGB )    shift  
+                                                                volumeGB=$1
+                                                    ;;
+                                                * ) help_bucket_create_node
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_node $namespace $nodecount $profile $os $osv $withClient $withVolume $volumeGB
+                        ;;
+                        db )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )       help_bucket_create_node
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                -t | --count )  shift  
+                                                    nodecount=$1
+                                                    ;;
+                                                -p | --profile )    shift
+                                                    profile=$1
+                                                    ;;
+                                                --os )  shift  
+                                                    os=$1
+                                                    ;;
+                                                -v | --osv )  shift  
+                                                    osv=$1
+                                                    ;;
+                                                --withClient )  withClient=1
+                                                    ;;
+                                                --withVolume )  withVolume=1
+                                                    ;;
+                                                --volumeGB )    shift  
+                                                                volumeGB=$1
+                                                    ;;
+                                                * ) help_bucket_create_node
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_node $namespace $nodecount $profile $os $osv $withClient $withVolume $volumeGB
+                        ;;
+                        client )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -v | --version )    show_version
+                                            exit
+                                            ;;
+                                    -h | --help )       help_bucket_create_client
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                --name )  shift  
+                                                    nodename=$1
+                                                    ;;
+                                                * ) help_bucket_create_client
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_client $namespace $nodename
+                        ;;
+                        dtr )    shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )       help_bucket_create_dtr
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                --name )    shift
+                                                    nodename=$1
+                                                    ;;
+                                                -p | --profile )    shift
+                                                    profile=$1
+                                                    ;;
+                                                * ) help_bucket_create_dtr
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_dtr $namespace $nodename $profile
+                        ;;
+                        k8s )    shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )       help_bucket_create_k8s
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                -p | --profile )    shift
+                                                    profile=$1
+                                                    ;;
+                                                -v | --k8sVersion ) shift
+                                                    k8sVersion=$1
+                                                    ;;
+                                                -m | --master )    shift
+                                                    nMaster=$1
+                                                    ;;
+                                                -w | --worker )    shift
+                                                    nWorker=$1
+                                                    ;;
+                                                --cni )    shift
+                                                    cni=$1
+                                                    ;;
+                                                --csi )    shift
+                                                    csi=$1
+                                                    ;;
+                                                --dtr )    shift
+                                                    dtr=$1
+                                                    ;;
+                                                --noClient )   noClient=1
+                                                    ;;
+                                                * ) help_bucket_create_k8s
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_k8s $namespace $profile $k8sVersion $nMaster $nWorker $cni $csi $dtr $noClient
+                        ;;
+                        k8sUI )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_create_k8sui
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                * ) help_bucket_create_k8sui
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_k8sui $namespace $k8sVersion
+                        ;;
+                        nfs )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_create_nfs
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                        namespace=$1
+                                                        ;;
+                                                -p | --profile )    shift
+                                                    profile=$1
+                                                    ;;
+                                                * ) help_bucket_create_ns
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_nfs $namespace $profile
+                        ;;
+                        bdc )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )       help_bucket_create_bdc
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                --name )  shift  
+                                                    nodename=$1
+                                                    ;;
+                                                * ) help_bucket_create_bdc
+                                                    exit 1
+                                                    ;;
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_client $namespace $nodename
+                        ;;
+                        rope )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )       help_bucket_create_rope
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -b | --bucket )  shift  
+                                                    bucket=$1
+                                                    ;;
+                                                -r | --rope )  shift  
+                                                    ropeType=$1
+                                                    ;;
+                                                -k | --hook )  shift  
+                                                    hook=$1
+                                                    ;;
+                                                * ) help_bucket_create_rope
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_rope $bucket $ropeType $hook
+                        ;;
+                        gluster )    shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )       help_bucket_create_gluster
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                -p | --profile )    shift
+                                                    profile=$1
+                                                    ;;
+                                                -gn | --glusterNode )   shift
+                                                                        glusterNode=$1
+                                                                        ;;
+                                                --volumeGB )    shift
+                                                                volumeGB=$1
+                                                                ;;
+                                                --noClient )    noClient=1
+                                                                ;;
+                                                * ) help_bucket_create_gluster
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_create_gluster $namespace $profile $glusterNode $volumeGB $noClient
+                        ;;
+                        * ) help_bucket_create
+                            exit 1
+                    esac
+                shift
+                ;;            
+        show )    shift
+                cmd1=$1
+                case $cmd1 in
+                    -h | --help )       help_bucket_show
+                                        exit
+                                        ;;
+                    ns )  bucket_show_ns 
+                        ;;
+                    k8s )  shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )   help_bucket_show_k8s
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                            * ) help_bucket_show_k8s
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                        shift
+                        bucket_show_k8s $namespace 
+                        ;;
+                    k8sUI )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_show_k8sui
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                * ) help_bucket_show_k8sui
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_show_k8sui $namespace
+                        ;;
+                    rope )  shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )   help_bucket_show_rope
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -b | --bucket )  shift  
+                                                    bucket=$1
+                                                    ;;
+                                            * ) help_bucket_show_rope
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                        shift
+                        bucket_show_rope $bucket 
+                        ;;
+                    profile )  bucket_show_profile
+                        ;;
+                    * ) help_bucket_show
+                        exit 1
+                esac
+            shift
+            ;;
+        rm | delete )    shift
+            cmd1=$1
+                case $cmd1 in
+                    -h | --help )       help_bucket_delete
+                                        exit
+                                        ;;
+                    ns )    shift
+                            namespace=$1
+                        bucket_delete_ns $namespace 
+                        ;;
+                    k8s )   shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )   help_bucket_delete_ns
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                            --name )    shift  
+                                                        nodename=$1
+                                                        ;;
+                                            * ) help_bucket_delete_k8s
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                            shift
+                            bucket_delete_k8s $namespace $nodename
+                        ;;
+                    k8sUI )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_delete_k8sui
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                -v | --k8sVersion ) shift
+                                                    k8sVersion=$1
+                                                    ;;
+                                                * ) help_bucket_delete_k8sui
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_delete_k8sui $namespace $k8sVersion
+                        ;;
+                    rope )   shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )   help_bucket_delete_rope
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -b | --bucket )  shift  
+                                                    bucket=$1
+                                                    ;;
+                                            -r | --rope )    shift  
+                                                        ropename=$1
+                                                        ;;
+                                            * ) help_bucket_delete_rope
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                            shift
+                            bucket_delete_rope $bucket $ropename
+                        ;;
+                    profile )   shift
+                                profile=$1
+                            bucket_delete_profile $profile 
+                        ;;
+                    gfs | gluster )   shift
+                                      namespace=$1
+                            bucket_delete_gluster $namespace 
+                        ;;
+                    node )  shift
+                            namespace=$1
+                            bucket_delete_node $namespace 
+                        ;;
+                    * ) help_bucket_delete
+                        exit 1
+                esac
+                shift
+            ;;
+        setup )    shift
+                cmd1=$1
+                case $cmd1 in
+                    -h | --help )   help_bucket_setup
+                                    exit
+                                    ;;
+                    init )      finit=1; 
+                                ;;
+                    profile )   fprofile=1; 
+                                ;;
+                    template )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_setup_template
+                                            exit
+                                            ;;
+                                    -c | --client )     fclient=1;
+                                                        ;;
+                                    -n | --node )     fnode=1;
+                                                        ;;
+                                    -k | --k8s )        fk8s=1;
+                                                        ;;
+                                    -g | --gluster )   fglust=1;
+                                                        ;;
+                                    -d | --dtr )        fdtr=1;
+                                                        ;;
+                                    -a | --all )        ftall=1;
+                                                        ;;      
+                                    * )     help_bucket_setup_template
+                                            exit 1;
+                                            ;;
+                                esac
+                                shift
+                                bucket_setup_template $fclient $fnode $fdtr $fk8s $ftall
+                                exit 0;
+                                ;;
+                    db )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_setup_template
+                                            exit
+                                            ;;
+                                    -c | --client )     fclient=1;
+                                                        ;;
+                                    -n | --client )     fnode=1;
+                                                        ;;
+                                    -k | --k8s )        fk8s=1;
+                                                        ;;
+                                    -g | --gluster )   fglust=1;
+                                                        ;;
+                                    -d | --dtr )        fdtr=1;
+                                                        ;;
+                                    -a | --all )        ftall=1;
+                                                        ;;      
+                                    * )     help_bucket_setup_template
+                                            exit 1;
+                                            ;;
+                                esac
+                                shift
+                                bucket_setup_template $fclient $fnode $fdtr $fk8s $ftall
+                                exit 0;
+                                ;;
+                    all )   fsall=1; 
+                            ;;
+                    * ) help_bucket_setup
+                        exit 1
+                esac
+                shift
+            bucket_setup $finit $fprofile $ftemplate $fsall
+            ;;   
+        * )         help_bucket
+                    exit 1
+    esac
+    shift
+done
