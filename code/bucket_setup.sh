@@ -93,14 +93,21 @@ bucket_setup_profile(){
     echo -e "${CYAN}All profiles for bucket created successfully${NC}"
 }
 #
-bucket_setup_template_client(){
-    echo "Performinig initial client template configuration..."
-    lxc launch images:centos/7 sys-client-v1 --profile tiny
-    sleep 5s
+bucket_setup_template_init() {
+    echo "Performinig initial template configuration..."
+    lxc launch images:centos/7 sys-init --profile tiny
+    sleep 3s
     echo "Initial bootstarp..."
     cat preconfig/bootstrap-template.sh | lxc exec sys-client-v1 bash
-    lxc file push code/kube-flannel.yml sys-client-v1/root/kube-flannel.yml
-    echo "Client bootstarp..."
+    lxc file push code/kube-flannel.yml sys-init/root/kube-flannel.yml
+    lxc stop sys-init
+    echo -e "${CYAN}Initial template configured successfully ${NC}"
+}
+bucket_setup_template_client(){
+    echo "Performinig initial client template configuration..."
+    lxc copy sys-init sys-client-v1 --profile mini
+    lxc start sys-client-v1
+    sleep 5s
     cat preconfig/bootstrap-client-v1.sh | lxc exec sys-client-v1 bash
     lxc stop sys-client-v1
     echo -e "${CYAN}Client template configured successfully ${NC}"
@@ -108,17 +115,26 @@ bucket_setup_template_client(){
 #
 bucket_setup_template_node(){
     echo "Performinig initial node template configuration..."
-    lxc copy sys-client-v1 sys-node --profile mini2
+    lxc copy sys-init sys-node --profile mini2
     lxc start sys-node
-    sleep 2s
+    sleep 3s
     cat preconfig/bootstrap-node.sh | lxc exec sys-node bash
     lxc stop sys-node
     echo -e "${CYAN} Node template configured successfully ${NC}"
 }
 #
+bucket_setup_template_mysql() {
+    lxc copy sys-init sys-mysql --profile mini2
+    lxc start sys-mysql
+    sleep 3s
+    cat preconfig/bootstrap-mysql.sh | lxc exec sys-mysql bash
+    lxc stop sys-mysql
+    echo -e "${CYAN}MySQL template configured successfully ${NC}"
+}
+#
 bucket_setup_template_k8s(){
     echo "Performinig initial k8s template configuration..."
-    lxc copy sys-client-v1 sys-k8s --profile mini2
+    lxc copy sys-init sys-k8s --profile mini2
     lxc start sys-k8s
     sleep 2s
     cat preconfig/bootstrap-k8s.sh | lxc exec sys-k8s bash
@@ -127,8 +143,8 @@ bucket_setup_template_k8s(){
 }
 bucket_setup_template_gluster(){
     echo "Performinig initial glusterFS template configuration..."
-    lxc launch images:centos/7 sys-gluster --profile mini2
-    sleep 5s
+    lxc copy sys-init sys-gluster --profile mini2
+    sleep 3s
     cat preconfig/bootstrap-gluster.sh | lxc exec sys-gluster bash
     lxc stop sys-gluster
     echo -e "${CYAN} glusterFS template configured successfully ${NC}"
@@ -137,7 +153,7 @@ bucket_setup_template_gluster(){
 bucket_setup_template_dtr(){
     echo "Performinig initial dtr template configuration..."
     #: '
-    lxc copy sys-client-v1 sys-dtr --profile mini
+    lxc copy sys-init sys-dtr --profile mini
     lxc start sys-dtr
     sleep 2s
     lxc file push images/flannel.tar.gz sys-dtr/root/flannel.tar.gz
@@ -152,22 +168,36 @@ bucket_setup_template_dtr(){
 #
 bucket_setup_template(){
     echo "Performinig initial template configuration..."
-    # $fclient $fnode $fdtr $fk8s $ftall
+    # $fclient $fnode $fmysql $fk8s $fglust $fdtr $ftall
     fclient=$1
     shift
     fnode=$1
     shift
-    fdtr=$1
+    fmysql=$1
     shift
     fk8s=$1
     shift
+    fglust=$1
+    shift
+    fdtr=$1
+    shift
     ftall=$1
+    #
+    echo "fmysql=$fmysql"
+    initName="sys-init"
+    bucket=$(lxc list $initName --format csv -c n)
+    if [[ ! $bucket ]]; then 
+        bucket_setup_template_init;
+    fi
     #
     if (( $fclient > 0 )); then
         bucket_setup_template_client;
     fi
     if (( $fnode > 0 )); then
         bucket_setup_template_node;
+    fi
+    if (( $fmysql > 0 )); then
+        bucket_setup_template_mysql;
     fi
     if (( $fk8s > 0 )); then
         bucket_setup_template_k8s;
@@ -209,6 +239,6 @@ bucket_setup() {
     if (( $fsall > 0 )); then
         bucket_setup_init;
         bucket_setup_profile;
-        bucket_setup_template 0 0 0 0 1;
+        bucket_setup_template 0 0 0 0 0 0 1;
     fi
 }

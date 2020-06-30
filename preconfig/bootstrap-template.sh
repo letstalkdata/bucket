@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-k8sVersion="1.14.2"
+k8sVersion="1.14.9"
 mkdir -p /root/.kube
 # Install docker from Docker-ce repository
 echo "[TASK 1] Install docker container engine"
@@ -81,3 +81,4 @@ mknod /dev/kmsg c 1 11
 chmod +x /etc/rc.d/rc.local
 echo 'mknod /dev/kmsg c 1 11' >> /etc/rc.d/rc.local
 #
+yum install -y -q xfsprogs >/dev/null 2>&1

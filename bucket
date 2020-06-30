@@ -13,6 +13,7 @@ source code/bucket_setup.sh
 source code/gen-helper-function.sh
 source code/bucket_gluster.sh
 source code/bucket_nfs.sh
+source code/bucket_mysql.sh
 #
 nodename="default"
 bucket="default"
@@ -45,11 +46,15 @@ ftemplate=0;
 fsall=0;
 fclient=0;
 fnode=0;
+fmysql=0;
 fdtr=0;
 fk8s=0;
 ftall=0;
 fglust=0;
 glusterNode=1;
+dbtype="standalone"
+sqlNode=1;
+dataNode=2;
 cmd1=
 cmd2=
 cmd3=
@@ -240,14 +245,17 @@ while [ "$1" != "" ]; do
                                                 -n | --namespace )  shift  
                                                     namespace=$1
                                                     ;;
-                                                -t | --type )  shift  
-                                                    dbtype=$1
-                                                    ;;
-                                                -t | --type )  shift  
-                                                    dbtype=$1
-                                                    ;;
                                                 -p | --profile )    shift
                                                     profile=$1
+                                                    ;;
+                                                -t | --type )  shift  
+                                                    dbtype=$1
+                                                    ;;
+                                                -sn | --sqlNode )  shift  
+                                                    sqlNode=$1
+                                                    ;;
+                                                -dn | --dataNode )  shift  
+                                                    dataNode=$1
                                                     ;;
                                                 --withClient )  withClient=1
                                                     ;;
@@ -259,7 +267,7 @@ while [ "$1" != "" ]; do
                                     ;;
                                 esac
                             shift
-                            bucket_create_mysql $namespace $dbtype $profile $os $osv $withClient $withVolume $volumeGB
+                            bucket_create_mysql $namespace $profile $dbtype $sqlNode $dataNode $withClient
                         ;;
                         client )  shift
                                 cmd2=$1
@@ -683,16 +691,18 @@ while [ "$1" != "" ]; do
                     template )  shift
                                 cmd2=$1
                                 case $cmd2 in
-                                    -h | --help )   help_bucket_setup_template
-                                            exit
-                                            ;;
+                                    -h | --help )       help_bucket_setup_template
+                                                        exit 1;
+                                                        ;;
                                     -c | --client )     fclient=1;
                                                         ;;
-                                    -n | --client )     fnode=1;
+                                    -n | --node )       fnode=1;
+                                                        ;;
+                                    -m | --mysql )      fmysql=1;
                                                         ;;
                                     -k | --k8s )        fk8s=1;
                                                         ;;
-                                    -g | --gluster )   fglust=1;
+                                    -g | --gluster )    fglust=1;
                                                         ;;
                                     -d | --dtr )        fdtr=1;
                                                         ;;
@@ -702,10 +712,10 @@ while [ "$1" != "" ]; do
                                             exit 1;
                                             ;;
                                 esac
-                                shift
-                                bucket_setup_template $fclient $fnode $fdtr $fk8s $ftall
-                                exit 0;
-                                ;;
+                            shift
+                        bucket_setup_template $fclient $fnode $fmysql $fk8s $fglust $fdtr $ftall
+                        exit 0;
+                        ;;
                     all )   fsall=1; 
                             ;;
                     * ) help_bucket_setup
