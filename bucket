@@ -14,6 +14,7 @@ source code/gen-helper-function.sh
 source code/bucket_gluster.sh
 source code/bucket_nfs.sh
 source code/bucket_mysql.sh
+source code/bucket_list.sh
 #
 nodename="default"
 bucket="default"
@@ -723,6 +724,105 @@ while [ "$1" != "" ]; do
                 esac
                 shift
             bucket_setup $finit $fprofile $ftemplate $fsall
+            ;;
+        list )    shift
+                cmd1=$1
+                case $cmd1 in
+                    -h | --help )       help_bucket_show
+                                        exit
+                                        ;;
+                    ns )  bucket_list_ns 
+                        ;;
+                    k8s )  shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )   help_bucket_show_k8s
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                            * ) help_bucket_show_k8s
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                        shift
+                        bucket_show_k8s $namespace 
+                        ;;
+                    k8sUI )  shift
+                                cmd2=$1
+                                case $cmd2 in
+                                    -h | --help )   help_bucket_show_k8sui
+                                            exit
+                                            ;;
+                                    * ) while [ "$1" != "" ]; do
+                                            case $1 in
+                                                -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                                * ) help_bucket_show_k8sui
+                                                    exit 1
+                                            esac
+                                            shift
+                                        done
+                                    ;;
+                                esac
+                            shift
+                            bucket_show_k8sui $namespace
+                        ;;
+                    rope )  shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )   help_bucket_list_rope
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -b | --bucket )  shift  
+                                                    bucket=$1
+                                                    ;;
+                                            * ) help_bucket_list_rope
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                        shift
+                        bucket_list_rope $bucket 
+                        ;;
+                    node )  shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )   help_bucket_list_node
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                            * ) help_bucket_list_node
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                        shift
+                        bucket_list_node $namespace 
+                        ;;
+                    profile )  bucket_show_profile
+                        ;;
+                    * ) help_bucket_show
+                        exit 1
+                esac
+            shift
             ;;   
         * )         help_bucket
                     exit 1
