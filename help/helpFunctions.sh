@@ -356,3 +356,62 @@ help_bucket_create_nfs(){
     echo
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create nfs --help' for more information about a command.${NC}"
 }
+help_bucket_list(){
+    echo -e "${GREEN}list${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}list different resources created using bucket ${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} list [command]${NC}"
+    echo
+    echo -e "${CYAN}Available Commands:${NC}"
+    echo -e "${CYAN}ns                  list all existing namespaces${NC}"
+    echo -e "${CYAN}node                list all nodes in a given namespaces ${NC}"
+    echo -e "${CYAN}rope                list all ropes in a given namespaces${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket list -h ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
+    echo
+}
+help_bucket_list(){
+    echo -e "${GREEN}list ns${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}list all existing namespaces created using bucket ${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} list ns [namespace_name]${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket list ns n1 ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
+    echo
+}
+help_bucket_list(){
+    echo -e "${GREEN}list node${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}list all nodes in a given namespace ${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} list node [command]${NC}"
+    echo
+    echo -e "${CYAN}Available Flags:${NC}"
+    echo -e "${CYAN}-n, --namespace     namespaces name${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket list node -n n1 ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
+    echo
+}
