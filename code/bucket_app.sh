@@ -7,9 +7,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 #
 bucket_app_mssql() {
-    # $mode $namespace $profile $deplType $sqlEdition $saCred $ha $replica $withClient
-    mode=$1
-    shift
+    # $namespace $profile $deplType $sqlEdition $saCred $ha $replica $withClient
     nsName=$1
     shift
     profile=$1
@@ -26,11 +24,7 @@ bucket_app_mssql() {
     shift
     withClient=$1
     #
-    modeCheck=$(case $mode in create|delete) echo yes;; *)  echo no;; esac)
-    if [[ $modeCheck == "no" ]]; then 
-        echo -e "${RED}Cannot proceed with given dbtype. Valid modes are [create], delete${NC}" ;
-        exit 1;
-    fi
+    #
     if [[ $nsName == "sys" ]]; then
         echo -e "${GREEN}[sys] ${RED}namespace is reserved. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
@@ -67,7 +61,7 @@ bucket_app_mssql() {
     lxc file pull sys-dtr/certs/ca.crt configs/ca.crt
     clientName=$nsName"-client"
     if (( $withClient > 0 )); then
-        echo -e "${CYAN}Deploying client node to access the msSQL cluster.${GREEN}[$clientName]${NC}"
+        echo -e "${CYAN}Deploying client node to access the MSSQL cluster.${GREEN}[$clientName]${NC}"
         lxc copy sys-client-v1 $clientName --profile mini
         lxc start $clientName
         lxc file push configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
@@ -92,6 +86,93 @@ bucket_app_mssql() {
             bucket_create_rope $primarySqlNode "webssh"
         fi
         echo -e "${GREEN}SQL Server Instance Deployment and configuration completed successfully${NC}" ;
+        if (( $withClient > 0 )); then
+            bucket_create_rope $clientName "webssh"
+        fi
+    elif (( $ha > 0 )); then
+        if (( $replica < 1 )); then
+            echo -e "${RED}Cannot proceed with given number of replica. Please pass appropriate --replica parameters${NC}" ;
+            exit 1;
+        fi
+        echo "MSSQL HA deployment is not supported yet. Implementation is in progress.."
+        exit 1;
+    fi    
+}
+#
+bucket_app_mysql() {
+    # $namespace $profile $deplType $ha $saCred $sqlNode $dataNode $withClient
+    nsName=$1
+    shift
+    profile=$1
+    shift
+    deplType=$1
+    shift
+    ha=$1
+    shift
+    saCred=$1
+    shift
+    sqlNode=$1
+    shift
+    dataNode=$1
+    shift
+    withClient=$1
+    #
+    #
+    if [[ $nsName == "sys" ]]; then
+        echo -e "${GREEN}[sys] ${RED}namespace is reserved. Please provide another namespace to proceed. exiting...${NC}" ;
+        exit 1;
+    fi
+    if [[ $nsName == "default" ]]; then
+        echo -e "${RED}Can not create glusterFS cluster in [default] namespace. Please provide another namespace to proceed. exiting...${NC}" ;
+        exit 1;
+    fi
+    check=$(cat db/ns.csv | grep "$nsName")
+    if [[ ! $check ]]; then 
+        echo -e "${GREEN}Namespace doesnot exists. Creating namespace.${NC}";
+        echo $nsName >> db/ns.csv
+        echo -e "${CYAN}New namespace ${GREEN}[$nsName]${CYAN} created successfully${NC}"   
+    fi
+    #
+    profileCheck=$(case $profile in tiny|mini|mini2|regular|regular2|heavy|heavy2|heavy3) echo yes;; *)  echo no;; esac)
+    if [[ $profileCheck == "no" ]]; then 
+        echo -e "${RED}Cannot proceed with given profile. Valid bucket profiles are tiny, [mini], mini2, regular, regular2, heavy, heavy2, heavy3${NC}" ;
+        exit 1;
+    fi
+    deplTypeCheck=$(case $deplType in node|docker|k8s) echo yes;; *)  echo no;; esac)
+    if [[ $deplTypeCheck == "no" ]]; then 
+        echo -e "${RED}Cannot proceed with given deplType. Valid deployment types are [node], docker and k8s${NC}" ;
+        exit 1;
+    fi
+    #
+    #
+    start=`date +%s`
+    lxc file pull sys-dtr/certs/ca.crt configs/ca.crt
+    clientName=$nsName"-client"
+    if (( $withClient > 0 )); then
+        echo -e "${CYAN}Deploying client node to access the MySQL cluster.${GREEN}[$clientName]${NC}"
+        lxc copy sys-client-v1 $clientName --profile mini
+        lxc start $clientName
+        lxc file push configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
+    fi
+    #
+    primarySqlNode=$nsName"-mysql1"
+    if (( $ha < 1 )); then
+        if (( $replica > 0 )); then
+            echo -e "${RED}Setting up MySQL deployment without HA. Ignoring --sqlNode and --dataNode parameters.${NC}" ;
+        fi
+        echo -e "${CYAN}Deploying Primary MySQL node...${NC}" ;
+        lxc copy sys-mysql $primarySqlNode --profile $profile
+        lxc start $primarySqlNode
+        sleep 3s
+        echo -e "${CYAN}Setup and configure MySQL Instance${NC}" ;
+        cat template/deploy-1N-mysql.sh > code/deploy-1N-mysql.sh
+        sed -i -e "s/<sqlcred>/$saCred/g" code/deploy-1N-mysql.sh
+        cat code/deploy-1N-mysql.sh | lxc exec $primarySqlNode bash
+        if (( $withClient < 1 )); then
+            echo -e "${CYAN}Setup wenssh rope to directly access MySQL Server node${NC}" ;
+            bucket_create_rope $primarySqlNode "webssh"
+        fi
+        echo -e "${GREEN}MySQL Instance Deployment and configuration completed successfully${NC}" ;
         if (( $withClient > 0 )); then
             bucket_create_rope $clientName "webssh"
         fi

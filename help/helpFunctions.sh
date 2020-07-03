@@ -60,13 +60,37 @@ help_bucket_app_mssql(){
     echo -e "${CYAN}${GREEN}bucket app mssql ${CYAN} [parameters] [flags]${NC}"
     echo 
     echo -e "${CYAN}Available Parameters:${NC}"
-    echo -e "${CYAN}-m,  --mode            App mode ([create], delete) ${NC}"
     echo -e "${CYAN}-n,  --namespace       Attach deloyment to given namespace${NC}"
     echo -e "${CYAN}-p,  --profile         Pass different profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
     echo -e "${CYAN}-dt, --deplType        Deploy SQL Server on [node], docker or k8s ${NC}"
     echo -e "${CYAN}-e,  --edition         Deploy SQL Server Edition [Developer], Evaluation, Express, Web, Standard, Enterprise${NC}"
     echo -e "${CYAN}-c,  --saCred          Set SQL Server SA password as per Microsoft recomendation ${NC}"
-    echo -e "${CYAN}-r,  --replica         If --ha flag is set, pass number of replica to be created.${NC}"
+    echo -e "${CYAN}-r,  --replica         If --ha flag is set, pass number of replica to be configured.${NC}"
+    echo
+    echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}     --ha              Setup SQL Server Always-On Highly available cluster ${NC}"
+    echo -e "${CYAN}     --withClient      Add client node along with 'webssh' rope to this setup ${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket app${CYAN} [command] --help' for more information about a command.${NC}"
+}
+help_bucket_app_mysql(){
+    echo -e "${CYAN}${GREEN}bucket app mysql${CYAN} help${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Deploy MySQL Database instance for your learning and validation purpose${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket app mysql ${CYAN} [parameters] [flags]${NC}"
+    echo 
+    echo -e "${CYAN}Available Parameters:${NC}"
+    echo -e "${CYAN}-n,  --namespace       Attach deloyment to given namespace${NC}"
+    echo -e "${CYAN}-p,  --profile         Pass different profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
+    echo -e "${CYAN}-dt, --deplType        Deploy SQL Server on [node], docker or k8s ${NC}"
+    echo -e "${CYAN}-c,  --cred            Set SQL Server SA password as per Microsoft recomendation ${NC}"
+    echo -e "${CYAN}-sn, --sqlNode         If --ha flag is set, pass number of SQL Node to be configured.${NC}"
+    echo -e "${CYAN}-dn, --dataNode        If --ha flag is set, pass number of Data NOde to be configured.${NC}"
     echo
     echo -e "${CYAN}Flags:${NC}"
     echo -e "${CYAN}     --ha              Setup SQL Server Always-On Highly available cluster ${NC}"

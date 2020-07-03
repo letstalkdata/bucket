@@ -60,7 +60,7 @@ dbtype="standalone";
 deplType="node";
 clusterType="standalone";
 sqlEdition="Developer"
-saCred="Bucket1@mssql"
+saCred="Bucket1@sql"
 ha=0;
 replica=0;
 sqlNode=1;
@@ -531,8 +531,13 @@ while [ "$1" != "" ]; do
                                                 -p | --profile )    shift
                                                     profile=$1
                                                     ;;
-                                                -t | --type )  shift  
-                                                    dbtype=$1
+                                                -dt | --deplType )  shift  
+                                                    deplType=$1
+                                                    ;;
+                                                --ha )  ha=1
+                                                    ;;
+                                                -c | --cred )  shift  
+                                                    saCred=$1
                                                     ;;
                                                 -sn | --sqlNode )  shift  
                                                     sqlNode=$1
@@ -550,7 +555,7 @@ while [ "$1" != "" ]; do
                                     ;;
                                 esac
                             shift
-                            bucket_app_mysql $namespace $profile $dbtype $sqlNode $dataNode $withClient
+                            bucket_app_mysql $namespace $profile $deplType $ha $saCred $sqlNode $dataNode $withClient
                         ;;
                         mssql )  shift
                                 cmd2=$1
@@ -560,9 +565,6 @@ while [ "$1" != "" ]; do
                                             ;;
                                     * ) while [ "$1" != "" ]; do
                                             case $1 in
-                                                -m | --mode )  shift  
-                                                    mode=$1
-                                                    ;;
                                                 -n | --namespace )  shift  
                                                     namespace=$1
                                                     ;;
@@ -593,7 +595,7 @@ while [ "$1" != "" ]; do
                                     ;;
                                 esac
                             shift
-                            bucket_app_mssql $mode $namespace $profile $deplType $sqlEdition $saCred $ha $replica $withClient
+                            bucket_app_mssql $namespace $profile $deplType $sqlEdition $saCred $ha $replica $withClient
                         ;;
                         * ) help_bucket_app
                             exit 1

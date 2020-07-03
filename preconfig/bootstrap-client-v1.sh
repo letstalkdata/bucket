@@ -18,3 +18,12 @@ sudo ACCEPT_EULA=Y yum install -y mssql-tools unixODBC-devel
 echo 'export PATH=$PATH:/opt/mssql/bin:/opt/mssql-tools/bin' | sudo tee /etc/profile.d/mssql.sh 
 source /etc/profile.d/mssql.sh 
 #
+cat >/etc/yum.repos.d/MariaDB.repo<<EOF
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.5.4/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+EOF
+rpm --import https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+yum -y install MariaDB-client MariaDB-shared
