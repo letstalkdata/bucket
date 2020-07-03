@@ -18,6 +18,7 @@ help_bucket(){
     echo -e "${CYAN}Available Commands:${NC}"
     echo -e "${CYAN}config       Manage bucket instance and server configuration options${NC}"
     echo -e "${CYAN}setup        Setup bucket environment on your ubuntu machine (physical/VM)${NC}"
+    echo -e "${CYAN}app          Deploy and setup different apps in the bucket environment${NC}"
     echo -e "${CYAN}info         Showcase overall information of bucket setup${NC}"
     echo -e "${CYAN}create       Create nodes and clusters${NC}"
     echo -e "${CYAN}delete       Delete nodes and clusters${NC}"
@@ -31,6 +32,51 @@ help_bucket(){
     echo
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} [command] --help' for more information about a command.${NC}"
 }
+help_bucket_app(){
+    echo -e "${CYAN}${GREEN}bucket app${CYAN} help${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Deploy Different apps using bucket tool for your learning and validation purpose${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket app${CYAN} [command]${NC}"
+    echo
+    echo -e "${CYAN}Available Commands:${NC}"
+    echo -e "${CYAN}mysql        Manage bucket instance and server configuration options${NC}"
+    echo -e "${CYAN}mssql        Setup bucket environment on your ubuntu machine (physical/VM)${NC}"
+    echo -e "${CYAN}nfs          Deploy and setup different apps in the bucket environment${NC}"
+    echo -e "${CYAN}gluster      Showcase overall information of bucket setup${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket app${CYAN} [command] --help' for more information about a command.${NC}"
+}
+help_bucket_app_mssql(){
+    echo -e "${CYAN}${GREEN}bucket app mssql${CYAN} help${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Deploy Microsoft SQL Server Database instance for your learning and validation purpose${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket app mssql ${CYAN} [parameters] [flags]${NC}"
+    echo 
+    echo -e "${CYAN}Available Parameters:${NC}"
+    echo -e "${CYAN}-m,  --mode            App mode ([create], delete) ${NC}"
+    echo -e "${CYAN}-n,  --namespace       Attach deloyment to given namespace${NC}"
+    echo -e "${CYAN}-p,  --profile         Pass different profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
+    echo -e "${CYAN}-dt, --deplType        Deploy SQL Server on [node], docker or k8s ${NC}"
+    echo -e "${CYAN}-e,  --edition         Deploy SQL Server Edition [Developer], Evaluation, Express, Web, Standard, Enterprise${NC}"
+    echo -e "${CYAN}-c,  --saCred          Set SQL Server SA password as per Microsoft recomendation ${NC}"
+    echo -e "${CYAN}-r,  --replica         If --ha flag is set, pass number of replica to be created.${NC}"
+    echo
+    echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}     --ha              Setup SQL Server Always-On Highly available cluster ${NC}"
+    echo -e "${CYAN}     --withClient      Add client node along with 'webssh' rope to this setup ${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket app${CYAN} [command] --help' for more information about a command.${NC}"
+}
 help_bucket_create(){
     echo -e "${GREEN}bucket create${CYAN} help${NC}"
     echo -e "${CYAN}Description:"
@@ -38,7 +84,7 @@ help_bucket_create(){
     echo
     echo -e "${CYAN}Usage:${NC}"
     echo -e "${CYAN}${GREEN}bucket${CYAN} create [command] [flags]${NC}"
-    echo
+    echo 
     echo -e "${CYAN}Available Commands:${NC}"
     echo -e "${CYAN}ns        Create NameSpace ${NC}"
     echo -e "${CYAN}node      Create simple CentOS/Ubuntu node/s for individual POCs ${NC}"
@@ -301,14 +347,15 @@ help_bucket_setup_template(){
     echo -e "${CYAN}${GREEN}bucket${CYAN} setup template [flags]${NC}"
     echo
     echo -e "${CYAN}Available Flags:${NC}"
-    echo -e "${CYAN}-c, --client        setup client template only${NC}"
-    echo -e "${CYAN}-n, --node          setup node template only${NC}"
-    echo -e "${CYAN}-m, --mysql         setup MySQL template only${NC}"
-    echo -e "${CYAN}-k, --k8s           setup k8s template only${NC}"
-    echo -e "${CYAN}-g, --gluster       setup glusterFS template only${NC}"
-    echo -e "${CYAN}-k, --k8s           setup k8s template only${NC}"
-    echo -e "${CYAN}-d, --dtr           setup dtr template only${NC}"
-    echo -e "${CYAN}-a, --all           setup all templates ${NC}"
+    echo -e "${CYAN}--client        setup client template only${NC}"
+    echo -e "${CYAN}--node          setup node template only${NC}"
+    echo -e "${CYAN}--mysql         setup MySQL template only${NC}"
+    echo -e "${CYAN}--mssql         setup MySQL template only${NC}"
+    echo -e "${CYAN}--k8s           setup k8s template only${NC}"
+    echo -e "${CYAN}--gluster       setup glusterFS template only${NC}"
+    echo -e "${CYAN}--k8s           setup k8s template only${NC}"
+    echo -e "${CYAN}--dtr           setup dtr template only${NC}"
+    echo -e "${CYAN}--all           setup all templates ${NC}"
     echo
     echo -e "${CYAN}Universal Flags:${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"

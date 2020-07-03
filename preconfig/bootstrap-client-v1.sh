@@ -11,4 +11,10 @@ yum -y install lttng-ust >/dev/null 2>&1
 yum -y install azdata-cli >/dev/null 2>&1
 yum -y install centos-release-gluster >/dev/null 2>&1
 yum install -y glusterfs-client >/dev/null 2>&1
+curl -o /etc/yum.repos.d/msprod.repo https://packages.microsoft.com/config/rhel/7/prod.repo 
+yum -y install sudo
+yum makecache 
+sudo ACCEPT_EULA=Y yum install -y mssql-tools unixODBC-devel 
+echo 'export PATH=$PATH:/opt/mssql/bin:/opt/mssql-tools/bin' | sudo tee /etc/profile.d/mssql.sh 
+source /etc/profile.d/mssql.sh 
 #

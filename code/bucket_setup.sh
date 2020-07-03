@@ -131,6 +131,14 @@ bucket_setup_template_mysql() {
     lxc stop sys-mysql
     echo -e "${CYAN}MySQL template configured successfully ${NC}"
 }
+bucket_setup_template_mssql() {
+    lxc copy sys-init sys-mssql --profile mini2
+    lxc start sys-mssql
+    sleep 3s
+    cat preconfig/bootstrap-mssql.sh | lxc exec sys-mssql bash
+    lxc stop sys-mssql
+    echo -e "${CYAN}MSSQL template configured successfully ${NC}"
+}
 #
 bucket_setup_template_k8s(){
     echo "Performinig initial k8s template configuration..."
@@ -168,12 +176,14 @@ bucket_setup_template_dtr(){
 #
 bucket_setup_template(){
     echo "Performinig initial template configuration..."
-    # $fclient $fnode $fmysql $fk8s $fglust $fdtr $ftall
+    # $fclient $fnode $fmysql $fmssql $fk8s $fglust $fdtr $ftall
     fclient=$1
     shift
     fnode=$1
     shift
     fmysql=$1
+    shift
+    fmssql=$1
     shift
     fk8s=$1
     shift
@@ -199,6 +209,9 @@ bucket_setup_template(){
     if (( $fmysql > 0 )); then
         bucket_setup_template_mysql;
     fi
+    if (( $fmssql > 0 )); then
+        bucket_setup_template_mssql;
+    fi
     if (( $fk8s > 0 )); then
         bucket_setup_template_k8s;
     fi
@@ -210,6 +223,8 @@ bucket_setup_template(){
     fi
     if (( $ftall > 0 )); then
         bucket_setup_template_client;
+        bucket_setup_template_mysql;
+        bucket_setup_template_mssql;
         bucket_setup_template_node;
         bucket_setup_template_k8s;
         bucket_setup_template_gluster;
@@ -239,6 +254,6 @@ bucket_setup() {
     if (( $fsall > 0 )); then
         bucket_setup_init;
         bucket_setup_profile;
-        bucket_setup_template 0 0 0 0 0 0 1;
+        bucket_setup_template 0 0 0 0 0 0 0 1;
     fi
 }
