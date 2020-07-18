@@ -9,8 +9,8 @@ NC='\033[0m' # No Color
 help_bucket(){
     echo -e "${CYAN}${GREEN}bucket${CYAN} help${NC}"
     echo -e "${CYAN}Description:"
-    echo -e "${GREEN}bucket${CYAN} is an utility for building miniaturised version SQL Server Big Data Cluster${NC}"
-    echo -e "${CYAN}for learning and validation purpose${NC}"
+    echo -e "${GREEN}bucket${CYAN} ... A tool to miniaturize your Technical Playground setup${NC}"
+    echo -e "${CYAN}It is an utility for building miniaturised version of setup for your test and validation activity${NC}"
     echo
     echo -e "${CYAN}Usage:${NC}"
     echo -e "${CYAN}${GREEN}bucket${CYAN} [command]${NC}"
@@ -19,11 +19,15 @@ help_bucket(){
     echo -e "${CYAN}config       Manage bucket instance and server configuration options${NC}"
     echo -e "${CYAN}setup        Setup bucket environment on your ubuntu machine (physical/VM)${NC}"
     echo -e "${CYAN}app          Deploy and setup different apps in the bucket environment${NC}"
+    echo -e "${CYAN}cluster      Deploy different cluster setup in the bucket environment${NC}"
     echo -e "${CYAN}info         Showcase overall information of bucket setup${NC}"
     echo -e "${CYAN}create       Create nodes and clusters${NC}"
     echo -e "${CYAN}delete       Delete nodes and clusters${NC}"
     echo -e "${CYAN}modify       Modify nodes and clusters${NC}" 
     echo -e "${CYAN}show         Show instance and other running details${NC}"
+    echo -e "${CYAN}list         Lists different bucket resources${NC}"
+    echo -e "${CYAN}push         push configs and files from local machine to multiple bucket nodes${NC}"
+    echo -e "${CYAN}push         Pull back configs and files from given bucket nodes to local machine${NC}"
     echo -e "${CYAN}snapshot     Manage bucket instance snapshots${NC}"
     echo
     echo -e "${CYAN}Flags:${NC}"
@@ -32,6 +36,29 @@ help_bucket(){
     echo
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} [command] --help' for more information about a command.${NC}"
 }
+##############  Cluster Help Functions  ####################################
+help_bucket_cluster(){
+    echo -e "${CYAN}${GREEN}bucket cluster${CYAN} help${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Deploy Different cluster using bucket tool for your learning and validation purpose${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket cluster${CYAN} [command]${NC}"
+    echo
+    echo -e "${CYAN}Available Commands:${NC}"
+    echo -e "${CYAN}k8s        Deploy one or multi master node Kubernetes cluster${NC}"
+    echo -e "${CYAN}bdc        Deploy Microsoft SQL Server Big data cluster${NC}"
+    echo -e "${CYAN}gluster    Deploy and setup multi-node GlusterFS storage cluster${NC}"
+    echo -e "${CYAN}mssql      Deploy and setup MSSQL cluster with always-on${NC}"
+    echo -e "${CYAN}mysql      Deploy and setup MySQL NDB cluster${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket app${CYAN} [command] --help' for more information about a command.${NC}"
+}
+############################################################################
+##############  App Help Functions  ####################################
 help_bucket_app(){
     echo -e "${CYAN}${GREEN}bucket app${CYAN} help${NC}"
     echo -e "${CYAN}Description:"
@@ -101,6 +128,8 @@ help_bucket_app_mysql(){
     echo
     echo -e "${CYAN}Use '${GREEN}bucket app${CYAN} [command] --help' for more information about a command.${NC}"
 }
+########################################################################
+##############  Create Help Functions  ####################################
 help_bucket_create(){
     echo -e "${GREEN}bucket create${CYAN} help${NC}"
     echo -e "${CYAN}Description:"
@@ -264,24 +293,63 @@ help_bucket_create_rope(){
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create rope --help' for more information about a command.${NC}"
     echo
 }
-help_bucket_show_rope(){
-    echo -e "${GREEN}show rope${CYAN} help:-${NC}"
+help_bucket_create_k8sui(){
+    echo -e "${GREEN}create k8sUI${CYAN} help:-${NC}"
     echo -e "${CYAN}Description:"
-    echo -e "${CYAN}Showcase all ropes attached given bucket ${NC}"
+    echo -e "${CYAN}Deploy K8sUI dashboard on existing K8s cluster and make it asscessble from LAN${NC}"
     echo
     echo -e "${CYAN}Usage:${NC}"
-    echo -e "${CYAN}${GREEN}bucket${CYAN} show rope [flags]${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} create k8sUI [flags]${NC}"
     echo
     echo -e "${CYAN}Flags:${NC}"
-    echo -e "${CYAN}-b, --bucket          Name of the bucket for attaching the rope${NC}"
+    echo -e "${CYAN}-n, --namespace       Attach client node to specified namespace${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
     echo
     echo -e "${CYAN}Example:${NC}"
-    echo -e "${CYAN}bucket show rope -b k8s2-client ${NC}"
+    echo -e "${CYAN}bucket create k8sUI -n k8s1 ${NC}"
     echo
-    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} show rope --help' for more information about a command.${NC}"
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create k8sUI --help' for more information about a command.${NC}"
     echo
 }
+help_bucket_create_gluster(){
+    echo -e "${GREEN}create gluster${CYAN} help${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Deploy Multi node glusterFS cluster${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} create gluster [flags]${NC}"
+    echo
+    echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}-n,  --namespace       Attach client node to specified namespace${NC}"
+    echo -e "${CYAN}-p,  --profile         bucket profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
+    echo -e "${CYAN}-gn, --glusterNode     No Of glusterFS Nodes (default is 1 and max is 9 as per this release)${NC}"
+    echo -e "${CYAN}     --volumeGB        Size of loopback volume (GB) to be added to each gluster node${NC}"
+    echo -e "${CYAN}     --noClient        Do not deploy a client node along with Kubernetes cluster for management${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create nfs --help' for more information about a command.${NC}"
+}
+help_bucket_create_nfs(){
+    echo -e "${GREEN}create nfs${CYAN} help${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Deploy single node NFS Server${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} create nfs [flags]${NC}"
+    echo
+    echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}-n,  --namespace       Attach NFS node to specified namespace${NC}"
+    echo -e "${CYAN}-p,  --profile         bucket profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create nfs --help' for more information about a command.${NC}"
+}
+###########################################################################
+##############  Delete Help Functions  ####################################
 help_bucket_delete_rope(){
     echo -e "${GREEN}delete rope${CYAN} help:-${NC}"
     echo -e "${CYAN}Description:"
@@ -303,22 +371,48 @@ help_bucket_delete_rope(){
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} delete rope --help' for more information about a command.${NC}"
     echo
 }
-help_bucket_create_k8sui(){
-    echo -e "${GREEN}create k8sUI${CYAN} help:-${NC}"
+###########################################################################
+##############  Show Help Functions  ####################################
+help_bucket_show(){
+    echo -e "${GREEN}show${CYAN} help:-${NC}"
     echo -e "${CYAN}Description:"
-    echo -e "${CYAN}Deploy K8sUI dashboard on existing K8s cluster and make it asscessble from LAN${NC}"
+    echo -e "${CYAN}Show different bucket configurationresources${NC}"
     echo
     echo -e "${CYAN}Usage:${NC}"
-    echo -e "${CYAN}${GREEN}bucket${CYAN} create k8sUI [flags]${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} show [command]${NC}"
     echo
-    echo -e "${CYAN}Flags:${NC}"
-    echo -e "${CYAN}-n, --namespace       Attach client node to specified namespace${NC}"
+    echo -e "${CYAN}Available Commands:${NC}"
+    echo -e "${CYAN}ns             Show all buckets inside a namespaces${NC}"
+    echo -e "${CYAN}rope           Show all ropes attached to a given bucket ${NC}"
+    echo -e "${CYAN}profile        SHow details about a given profile${NC}"
+    echo -e "${CYAN}k8s            Show all nodes which is part of Kubernetes cluster ${NC}"
+    echo -e "${CYAN}k8sUI          Show detail about K8sUI dashboard and its access token${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
     echo
     echo -e "${CYAN}Example:${NC}"
-    echo -e "${CYAN}bucket create k8sUI -n k8s1 ${NC}"
+    echo -e "${CYAN}bucket show -h ${NC}"
     echo
-    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create k8sUI --help' for more information about a command.${NC}"
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} setup --help' for more information about a command.${NC}"
+    echo
+}
+help_bucket_show_rope(){
+    echo -e "${GREEN}show rope${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Showcase all ropes attached to a given bucket ${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} show rope [flags]${NC}"
+    echo
+    echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}-b, --bucket          Name of the bucket for attaching the rope${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket show rope -b k8s2-client ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} show rope --help' for more information about a command.${NC}"
     echo
 }
 help_bucket_show_k8sui(){
@@ -339,6 +433,8 @@ help_bucket_show_k8sui(){
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create k8sUI --help' for more information about a command.${NC}"
     echo
 }
+#########################################################################
+##############  Setup Help Functions  ####################################
 help_bucket_setup(){
     echo -e "${GREEN}setup${CYAN} help:-${NC}"
     echo -e "${CYAN}Description:"
@@ -390,43 +486,8 @@ help_bucket_setup_template(){
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} setup template --help' for more information about a command.${NC}"
     echo
 }
-help_bucket_create_gluster(){
-    echo -e "${GREEN}create gluster${CYAN} help${NC}"
-    echo -e "${CYAN}Description:"
-    echo -e "${CYAN}Deploy Multi node glusterFS cluster${NC}"
-    echo
-    echo -e "${CYAN}Usage:${NC}"
-    echo -e "${CYAN}${GREEN}bucket${CYAN} create gluster [flags]${NC}"
-    echo
-    echo -e "${CYAN}Flags:${NC}"
-    echo -e "${CYAN}-n,  --namespace       Attach client node to specified namespace${NC}"
-    echo -e "${CYAN}-p,  --profile         bucket profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
-    echo -e "${CYAN}-gn, --glusterNode     No Of glusterFS Nodes (default is 1 and max is 9 as per this release)${NC}"
-    echo -e "${CYAN}     --volumeGB        Size of loopback volume (GB) to be added to each gluster node${NC}"
-    echo -e "${CYAN}     --noClient        Do not deploy a client node along with Kubernetes cluster for management${NC}"
-    echo
-    echo -e "${CYAN}Universal Flags:${NC}"
-    echo -e "${CYAN}-h, --help            Print help${NC}"
-    echo
-    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create nfs --help' for more information about a command.${NC}"
-}
-help_bucket_create_nfs(){
-    echo -e "${GREEN}create nfs${CYAN} help${NC}"
-    echo -e "${CYAN}Description:"
-    echo -e "${CYAN}Deploy single node NFS Server${NC}"
-    echo
-    echo -e "${CYAN}Usage:${NC}"
-    echo -e "${CYAN}${GREEN}bucket${CYAN} create nfs [flags]${NC}"
-    echo
-    echo -e "${CYAN}Flags:${NC}"
-    echo -e "${CYAN}-n,  --namespace       Attach NFS node to specified namespace${NC}"
-    echo -e "${CYAN}-p,  --profile         bucket profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
-    echo
-    echo -e "${CYAN}Universal Flags:${NC}"
-    echo -e "${CYAN}-h, --help            Print help${NC}"
-    echo
-    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create nfs --help' for more information about a command.${NC}"
-}
+###########################################################################
+##############  List Help Functions  ####################################
 help_bucket_list(){
     echo -e "${GREEN}list${CYAN} help:-${NC}"
     echo -e "${CYAN}Description:"
@@ -439,6 +500,7 @@ help_bucket_list(){
     echo -e "${CYAN}ns                  list all existing namespaces${NC}"
     echo -e "${CYAN}node                list all nodes in a given namespaces ${NC}"
     echo -e "${CYAN}rope                list all ropes in a given namespaces${NC}"
+    echo -e "${CYAN}profile             list all profiles available${NC}"
     echo
     echo -e "${CYAN}Universal Flags:${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
@@ -449,7 +511,7 @@ help_bucket_list(){
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
     echo
 }
-help_bucket_list(){
+help_bucket_list_ns(){
     echo -e "${GREEN}list ns${CYAN} help:-${NC}"
     echo -e "${CYAN}Description:"
     echo -e "${CYAN}list all existing namespaces created using bucket ${NC}"
@@ -466,13 +528,13 @@ help_bucket_list(){
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
     echo
 }
-help_bucket_list(){
+help_bucket_list_node(){
     echo -e "${GREEN}list node${CYAN} help:-${NC}"
     echo -e "${CYAN}Description:"
     echo -e "${CYAN}list all nodes in a given namespace ${NC}"
     echo
     echo -e "${CYAN}Usage:${NC}"
-    echo -e "${CYAN}${GREEN}bucket${CYAN} list node [command]${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} list node [flags]${NC}"
     echo
     echo -e "${CYAN}Available Flags:${NC}"
     echo -e "${CYAN}-n, --namespace     namespaces name${NC}"
@@ -486,3 +548,42 @@ help_bucket_list(){
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
     echo
 }
+help_bucket_list_rope(){
+    echo -e "${GREEN}list rope${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}list all ropes in a given namespaces${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} list rope [flags]${NC}"
+    echo
+    echo -e "${CYAN}Available Flags:${NC}"
+    echo -e "${CYAN}-n, --namespace     namespaces name${NC}"
+    echo -e "${CYAN}-b, --bucket        bucket node name${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket list rope -n n1 ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
+    echo
+}
+help_bucket_list_profile(){
+    echo -e "${GREEN}list profile${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}list all profiles available in the current deployment${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} list profile${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket list profile ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} list --help' for more information about a command.${NC}"
+    echo
+}
+#########################################################################

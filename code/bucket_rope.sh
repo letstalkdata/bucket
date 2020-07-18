@@ -98,14 +98,14 @@ bucket_delete_rope(){
     
 } 
 #
-bucket_show_rope(){
-    # $bucket
-    bucket=$1
-    existname=$(lxc list $bucket -c n --format csv | grep $bucket)
-    if [ "$bucket" != "$existname" ]; then
-        echo -e "${RED}Provided Bucket Name does not exist{NC}" ;
-        echo -e "${RED}Exiting...${NC}" ;
-        exit 1;
-    fi
-    lxc config device show $bucket | grep rope | cut -d':' -f1
-}  
+#bucket_show_rope(){
+#    # $bucket
+#    bucket=$1
+#    existname=$(lxc list $bucket -c n --format csv | grep $bucket)
+#    if [ "$bucket" != "$existname" ]; then
+#        echo -e "${RED}Provided Bucket Name does not exist{NC}" ;
+#        echo -e "${RED}Exiting...${NC}" ;
+#        exit 1;
+#    fi
+#    lxc config device show $bucket | grep rope | cut -d':' -f1
+#}  

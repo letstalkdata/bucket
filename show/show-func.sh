@@ -11,6 +11,7 @@ bucket_show_profile(){
     echo "|--------|-----------|-----|------------|"
     echo "| System |  tiny     |  1  |     1      |"
     echo "| System |  miny     |  1  |     2      |"
+    echo "| System |  miny2    |  2  |     2      |"
     echo "| System |  regular  |  2  |     2      |"
     echo "| System |  regular2 |  2  |     4      |"
     echo "| System |  heavy    |  4  |     8      |"
