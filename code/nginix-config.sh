@@ -6,8 +6,9 @@ events { }
 stream {
     upstream stream_backend {
         least_conn;
-        server 10.6.230.105:6443 ;
-        server 10.6.230.8:6443 ;
+        server 10.6.230.203:6443 ;
+        server 10.6.230.2:6443 ;
+        server 10.6.230.68:6443 ;
     }
     server {
         listen        6443 ;

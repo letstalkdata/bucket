@@ -61,8 +61,6 @@ bucket_create_node(){
                 exit 1;
             fi
             lxc launch images:centos/$osv $nName --profile $profile
-            sleep 5s
-            cat preconfig/nodeInit.sh | lxc exec $nName bash
             if (( $withVolume > 0 )); then
                 echo -e "${CYAN}Setting up loopback device...${NC}"
                 #
@@ -102,6 +100,16 @@ bucket_create_node(){
             fi
             lxc launch ubuntu:$osv $nName --profile $profile
         fi
+    done
+    nodeName=""
+    for (( c=1; c<=$nMaster; c++ )); do
+        nodeName=$nsName"-node"$c
+        lxc file push preconfig/nodeInit.sh $nodeName/nodeInit.sh
+    done
+    nodeName=""
+    for (( c=1; c<=$nMaster; c++ )); do
+        nodeName=$nsName"-node"$c
+        lxc exec $nodeName bash /nodeInit.sh &
     done
     clientName=$nsName"-client"
     if (( $withClient > 0 )); then

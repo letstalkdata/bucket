@@ -520,16 +520,16 @@ while [ "$1" != "" ]; do
                     esac
                 shift
                 ;;
-        cluster )    shift
+        cluster )   shift
                     cmd1=$1
                     case $cmd1 in
-                        -h | --help )       help_bucket_create
+                        -h | --help )       help_bucket_cluster
                                             exit
                                             ;;
                         k8s )    shift
                                 cmd2=$1
                                 case $cmd2 in
-                                    -h | --help )       help_bucket_create_k8s
+                                    -h | --help )       help_bucket_cluster_k8s
                                             exit
                                             ;;
                                     * ) while [ "$1" != "" ]; do
@@ -560,7 +560,7 @@ while [ "$1" != "" ]; do
                                                     ;;
                                                 --noClient )   noClient=1
                                                     ;;
-                                                * ) help_bucket_create_k8s
+                                                * ) help_bucket_cluster_k8s
                                                     exit 1
                                             esac
                                             shift
@@ -627,7 +627,7 @@ while [ "$1" != "" ]; do
                             shift
                             bucket_create_gluster $namespace $profile $glusterNode $volumeGB $noClient
                         ;;
-                        * ) help_bucket_create
+                        * ) help_bucket_cluster
                             exit 1
                     esac
                 shift
@@ -1030,7 +1030,7 @@ while [ "$1" != "" ]; do
                         shift
                         bucket_list_node $namespace 
                         ;;
-                    profile )  bucket_show_profile
+                    profile )  bucket_list_profile
                         ;;
                     * ) help_bucket_list
                         exit 1
@@ -1059,6 +1059,9 @@ while [ "$1" != "" ]; do
                                             -n | --namespace )  shift  
                                                     namespace=$1
                                                     ;;
+                                            -b | --bucket )  shift  
+                                                    bucket=$1
+                                                    ;;
                                             -c | --code ) shift
                                                     codePath=$1
                                                     ;;
@@ -1075,74 +1078,23 @@ while [ "$1" != "" ]; do
                                 ;;
                             esac
                         shift
-                        bucket_exec_code $namespace $codePath $execType $onClient 
+                        bucket_exec_code $namespace $bucket $codePath $execType $onClient 
                         ;;
                     * ) help_bucket_exec
                         exit 1
                 esac
             shift
             ;;
-        push )  shift
+        file )  shift
                 cmd1=$1
                 case $cmd1 in
-                    -h | --help )   help_bucket_push
+                    -h | --help )   help_bucket_file
                                     exit
                                     ;;
-                    config )    shift
-                                isBash=1; 
-                                nodename=$1 
-                                bucket_push_config $nodename
-                                ;;
-                    file )  shift
+                    pull )  shift
                             cmd2=$1
                             case $cmd2 in
-                                -h | --help )       help_bucket_push_file
-                                        exit
-                                        ;;
-                                * ) while [ "$1" != "" ]; do
-                                        case $1 in
-                                            -f | --file ) shift
-                                                    file=$1
-                                                    ;;
-                                            -n | --namespace )  shift  
-                                                    namespace=$1
-                                                    ;;
-                                            -b | --bucket )  shift  
-                                                    bucket=$1
-                                                    ;;  
-                                            -et |--execType )  shift  
-                                                    execType=$1
-                                                    ;;
-                                            * ) help_bucket_push_file
-                                                exit 1
-                                        esac
-                                        shift
-                                    done
-                                ;;
-                            esac
-                        shift
-                        bucket_push_file $file $namespace $bucket $execType
-                        ;;
-                    * ) help_bucket_push
-                        exit 1
-                esac
-            shift
-            ;;
-        pull )  shift
-                cmd1=$1
-                case $cmd1 in
-                    -h | --help )   help_bucket_pull
-                                    exit
-                                    ;;
-                    config )    shift
-                                isBash=1; 
-                                nodename=$1 
-                                bucket_pull_config $nodename
-                                ;;
-                    file )  shift
-                            cmd2=$1
-                            case $cmd2 in
-                                -h | --help )       help_bucket_pull_file
+                                -h | --help )       help_bucket_file_pull
                                         exit
                                         ;;
                                 * ) while [ "$1" != "" ]; do
@@ -1153,7 +1105,7 @@ while [ "$1" != "" ]; do
                                             -d | --destination ) shift
                                                     destination=$1
                                                     ;;
-                                            * ) help_bucket_pull_file
+                                            * ) help_bucket_file_pull
                                                 exit 1
                                         esac
                                         shift
@@ -1161,9 +1113,39 @@ while [ "$1" != "" ]; do
                                 ;;
                             esac
                         shift
-                        bucket_pull_file $file $source $destination
+                        bucket_file_pull $source $destination
                         ;;
-                    * ) help_bucket_push
+                    push )  shift
+                            cmd2=$1
+                            case $cmd2 in
+                                -h | --help )       help_bucket_file_push
+                                        exit
+                                        ;;
+                                * ) while [ "$1" != "" ]; do
+                                        case $1 in
+                                            -n | --namespace )  shift  
+                                                    namespace=$1
+                                                    ;;
+                                            -b | --bucket )  shift  
+                                                    bucket=$1
+                                                    ;;
+                                            -f | --file ) shift
+                                                    file=$1
+                                                    ;;  
+                                            -et |--execType )  shift  
+                                                    execType=$1
+                                                    ;;
+                                            * ) help_bucket_file_push
+                                                exit 1
+                                        esac
+                                        shift
+                                    done
+                                ;;
+                            esac
+                        shift
+                        bucket_file_push $namespace $bucket $file $execType
+                        ;;
+                    * ) help_bucket_file
                         exit 1
                 esac
             shift

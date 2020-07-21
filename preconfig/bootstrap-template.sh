@@ -35,8 +35,8 @@ yum install -y -q kubeadm-$k8sVersion kubelet-$k8sVersion kubectl-$k8sVersion >/
 #
 # Install additional required packages
 echo "[TASK 5] Install additional packages"
-yum install -y -q epel-release nfs-utils >/dev/null 2>&1
-yum install -y net-tools >/dev/null 2>&1
+yum install -y -q epel-release  >/dev/null 2>&1
+yum install -y nfs-utils net-tools >/dev/null 2>&1
 yum install -y -q wget which openssl yum-versionlock sshpass shellinabox >/dev/null 2>&1
 systemctl enable shellinaboxd.service >/dev/null 2>&1
 systemctl start shellinaboxd.service

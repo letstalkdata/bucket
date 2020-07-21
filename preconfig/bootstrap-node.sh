@@ -14,7 +14,7 @@ yum versionlock kube*
 # Install additional required packages
 echo "[TASK 3] Install additional packages"
 yum install -y -q epel-release >/dev/null 2>&1
-yum install -y -q wget which openssl shellinabox >/dev/null 2>&1
+yum install -y -q wget which openssl yum-versionlock sshpass shellinabox>/dev/null 2>&1
 systemctl enable shellinaboxd.service >/dev/null 2>&1
 systemctl start shellinaboxd.service
 cat >>/etc/securetty<<EOF
@@ -30,3 +30,13 @@ Pts/8
 Pts/9
 EOF
 #
+# Set Root password
+echo "[TASK 4] Set root password"
+echo "bucket" | passwd --stdin root >/dev/null 2>&1
+#
+# Install Openssh server
+echo "[TASK 5] Install and configure ssh"
+yum install -y -q openssh-server >/dev/null 2>&1
+sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl enable sshd >/dev/null 2>&1
+systemctl start sshd >/dev/null 2>&1

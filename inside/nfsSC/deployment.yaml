@@ -25,11 +25,11 @@ spec:
             - name: PROVISIONER_NAME
               value: bucket/nfs
             - name: NFS_SERVER
-              value: 10.6.230.163
+              value: 10.6.230.195
             - name: NFS_PATH
               value: /var/nfs/kubedata
       volumes:
         - name: nfs-client-root
           nfs:
-            server: 10.6.230.163
+            server: 10.6.230.195
             path: /var/nfs/kubedata

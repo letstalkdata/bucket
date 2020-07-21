@@ -5,7 +5,7 @@ i=10;
 while (( $i > 0 )); do
 	fname="testout"$i".txt"
 	echo "Test created" > $fname
-	sleep 2s
+	sleep 1s
 	i=$((i-1));
 done
 

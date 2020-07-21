@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 bucket_show_profile(){
     profile=$1
     #
-    chkprofile=$(cat db/profile  | column -t -s "|" | grep $prf)
+    chkprofile=$(cat db/profile  | column -t -s "|" | grep $profile)
     if [[ ! $chkprofile ]]; then 
         echo -e "${GREEN}Provided profile name does not exist... Exiting...${NC}" ;
         exit 0;

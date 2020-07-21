@@ -10,27 +10,27 @@ help_bucket(){
     echo -e "${CYAN}${GREEN}bucket${CYAN} help${NC}"
     echo -e "${CYAN}Description:"
     echo -e "${GREEN}bucket${CYAN} ... A tool to miniaturize your Technical Playground setup${NC}"
-    echo -e "${CYAN}It is an utility for building miniaturised version of setup for your test and validation activity${NC}"
+    echo -e "${CYAN}It is an utility for building miniaturised version of setup for your test and validation activities${NC}"
     echo
     echo -e "${CYAN}Usage:${NC}"
     echo -e "${CYAN}${GREEN}bucket${CYAN} [command]${NC}"
     echo
     echo -e "${CYAN}Available Commands:${NC}"
-    echo -e "${CYAN}config       Manage bucket instance and server configuration options${NC}"
     echo -e "${CYAN}setup        Setup bucket environment on your ubuntu machine (physical/VM)${NC}"
     echo -e "${CYAN}app          Deploy and setup different apps in the bucket environment${NC}"
     echo -e "${CYAN}cluster      Deploy different cluster setup in the bucket environment${NC}"
-    echo -e "${CYAN}info         Showcase overall information of bucket setup${NC}"
-    echo -e "${CYAN}create       Create nodes and clusters${NC}"
-    echo -e "${CYAN}delete       Delete nodes and clusters${NC}"
-    echo -e "${CYAN}modify       Modify nodes and clusters${NC}" 
-    echo -e "${CYAN}show         Show instance and other running details${NC}"
+    echo -e "${CYAN}create       Create different resources${NC}"
+    echo -e "${CYAN}delete       Delete different resources${NC}"
+    echo -e "${CYAN}modify       Modify different resources${NC}" 
     echo -e "${CYAN}list         Lists different bucket resources${NC}"
-    echo -e "${CYAN}push         push configs and files from local machine to multiple bucket nodes${NC}"
-    echo -e "${CYAN}push         Pull back configs and files from given bucket nodes to local machine${NC}"
+    echo -e "${CYAN}show         Show instance and other running resource details${NC}"
+    echo -e "${CYAN}exec         Execute bash command or code inside one or more bucket nodes${NC}"
+    echo -e "${CYAN}file         Perform File operation to/from bucket nodes${NC}"
     echo -e "${CYAN}snapshot     Manage bucket instance snapshots${NC}"
+    echo -e "${CYAN}info         Showcase overall information of bucket setup${NC}"
+    echo -e "${CYAN}config       Manage bucket instance and server configuration options${NC}"
     echo
-    echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}Universal Flags:${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
     echo -e "${CYAN}-v  --version         Print version number${NC}"
     echo
@@ -49,13 +49,38 @@ help_bucket_cluster(){
     echo -e "${CYAN}k8s        Deploy one or multi master node Kubernetes cluster${NC}"
     echo -e "${CYAN}bdc        Deploy Microsoft SQL Server Big data cluster${NC}"
     echo -e "${CYAN}gluster    Deploy and setup multi-node GlusterFS storage cluster${NC}"
-    echo -e "${CYAN}mssql      Deploy and setup MSSQL cluster with always-on${NC}"
-    echo -e "${CYAN}mysql      Deploy and setup MySQL NDB cluster${NC}"
+    echo -e "${CYAN}mssql      Deploy and setup MSSQL cluster with always-on high availability${NC}"
+    echo -e "${CYAN}mysql      Deploy and setup MySQL with NDB or innoDB HA cluster${NC}"
     echo
     echo -e "${CYAN}Universal Flags:${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
     echo
     echo -e "${CYAN}Use '${GREEN}bucket app${CYAN} [command] --help' for more information about a command.${NC}"
+}
+help_bucket_cluster_k8s(){
+    echo -e "${GREEN}bucket cluster k8s${CYAN} help${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Deploy Single master or Multi master kubernetes cluster${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} cluster k8s [flags]${NC}"
+    echo
+    echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}-n, --namespace       Attach client node to specified namespace${NC}"
+    echo -e "${CYAN}-p  --profile         worker node profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
+    echo -e "${CYAN}-v, --k8sVersion      Kubernetes version to be deployed (default = 1.14.2)${NC}"
+    echo -e "${CYAN}-m, --master          No Of Master Nodes (default is 1 and max of 3 as per this release)${NC}"
+    echo -e "${CYAN}-w, --worker          No Of worker Nodes (default is 1 and max of 9 as per this release)${NC}"
+    echo -e "${CYAN}    --cni             Container Network Interface (default = Flannel other options *Calico*, *Weave*)${NC}"
+    echo -e "${CYAN}    --csi             Container Storage Interface ([local], nfs, gluster)${NC}"
+    echo -e "${CYAN}    --dtr             Configure local docker registry (default = shared, other option *local* )${NC}"
+    echo -e "${CYAN}    --noClient        Do not deploy a client node along with Kubernetes cluster for management${NC}"
+    echo -e "${CYAN}    --noDashboard     Do not deploy Kubernetes dashboard along with Kubernetes cluster for visualization${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} cluster --help' for more information about a command.${NC}"
 }
 ############################################################################
 ##############  App Help Functions  ####################################
@@ -68,10 +93,10 @@ help_bucket_app(){
     echo -e "${CYAN}${GREEN}bucket app${CYAN} [command]${NC}"
     echo
     echo -e "${CYAN}Available Commands:${NC}"
-    echo -e "${CYAN}mysql        Manage bucket instance and server configuration options${NC}"
-    echo -e "${CYAN}mssql        Setup bucket environment on your ubuntu machine (physical/VM)${NC}"
-    echo -e "${CYAN}nfs          Deploy and setup different apps in the bucket environment${NC}"
-    echo -e "${CYAN}gluster      Showcase overall information of bucket setup${NC}"
+    echo -e "${CYAN}mysql        Deploy and configure MySQL database instance${NC}"
+    echo -e "${CYAN}mssql        Deploy and configure MSSQL database instance${NC}"
+    echo -e "${CYAN}nfs          Deploy and configure NFS(network file system) setup${NC}"
+    echo -e "${CYAN}gluster      Deploy and configure glusterFS HCI setup${NC}"
     echo
     echo -e "${CYAN}Universal Flags:${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
@@ -180,7 +205,7 @@ help_bucket_create_node(){
     echo -e "${CYAN}Flags:${NC}"
     echo -e "${CYAN}-n, --namespace       Attach node to given namespace${NC}"
     echo -e "${CYAN}-c, --count           Number of nodes to be created${NC}"
-    echo -e "${CYAN}-p  --profile         Pass different profile (tiny [mini] regular1 regular2 heavy1 heavy2 heavy3) ${NC}"
+    echo -e "${CYAN}-p  --profile         Pass different profile (tiny [mini] mini2 regular regular2 heavy1 heavy2 heavy3) ${NC}"
     echo -e "${CYAN}    --os              Create node with given os (default = [centos], ubuntu) ${NC}"
     echo -e "${CYAN}-v, --osv             Create node with given os and version ${NC}"
     echo -e "${CYAN}                      (default = [7] for centos (other versions 6 & 8)) ${NC}"
@@ -237,11 +262,10 @@ help_bucket_create_k8s(){
     echo -e "${CYAN}-v, --k8sVersion      Kubernetes version to be deployed (default = 1.14.2)${NC}"
     echo -e "${CYAN}-m, --master          No Of Master Nodes (default is 1 and max of 3 as per this release)${NC}"
     echo -e "${CYAN}-w, --worker          No Of worker Nodes (default is 1 and max of 9 as per this release)${NC}"
-    echo -e "${CYAN}    --cni             Container Network Interface (default = Flannel other options *Calico*, *Weave*)${NC}"
+    echo -e "${CYAN}    --cni             Container Network Interface ([Flannel], Calico, Weave)${NC}"
     echo -e "${CYAN}    --csi             Container Storage Interface ([local], nfs, gluster)${NC}"
-    echo -e "${CYAN}    --dtr             Configure local docker registry (default = shared, other option *local* )${NC}"
+    echo -e "${CYAN}    --dtr             Configure local docker registry ([shared], local )${NC}"
     echo -e "${CYAN}    --noClient        Do not deploy a client node along with Kubernetes cluster for management${NC}"
-    echo -e "${CYAN}    --noDashboard     Do not deploy Kubernetes dashboard along with Kubernetes cluster for visualization${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
     echo
     echo -e "${CYAN}Use '${GREEN}bucket${CYAN} create node --help' for more information about a command.${NC}"
@@ -282,8 +306,8 @@ help_bucket_create_rope(){
     echo
     echo -e "${CYAN}Flags:${NC}"
     echo -e "${CYAN}-b, --bucket          Name of the bucket for attaching the rope${NC}"
-    echo -e "${CYAN}-r, --rope            rope type to be created for hook attachment [default = ssh, dashbord)${NC}"
-    echo -e "${CYAN}-k, --hook            bucket hook (port) to attach [default = 22 for ssh rope type]${NC}"
+    echo -e "${CYAN}-r, --rope            rope type to be created for hook attachment ([ssh], webssh, k8sui)${NC}"
+    echo -e "${CYAN}-k, --hook            bucket hook (port) to attach (22 for ssh, 4200 for webssh, 32323 for k8sui rope type)${NC}"
     echo -e "${CYAN}-h, --help            Print help${NC}"
     echo
     echo -e "${CYAN}Example:${NC}"
@@ -587,3 +611,120 @@ help_bucket_list_profile(){
     echo
 }
 #########################################################################
+##############  Exec Help Functions  ####################################
+help_bucket_exec(){
+    echo -e "${GREEN}exec${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Execute bash command or code inside one or more bucket nodes${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} exec [command]${NC}"
+    echo
+    echo -e "${CYAN}Available Commands:${NC}"
+    echo -e "${CYAN}bash         Get bash terminal inside given node${NC}"
+    echo -e "${CYAN}code         list all nodes in a given namespaces ${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket exec bash n1-node1 ${NC}"
+    echo -e "${CYAN}bucket exec code -h${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} exec --help' for more information about a command.${NC}"
+    echo
+}
+help_bucket_exec_code(){
+    echo -e "${GREEN}exec${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Execute code on local instance inside one or more bucket nodes${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} exec code [flags]${NC}"
+    echo
+    echo -e "${CYAN}Available Flags:${NC}"
+    echo -e "${CYAN}-n,  --namespace     namespaces name${NC}"
+    echo -e "${CYAN}-b,  --bucket        bucket node name (if provided, code will run on this given node only)${NC}"
+    echo -e "${CYAN}-c,  --code          script file with full path${NC}"
+    echo -e "${CYAN}-et, --execType      Execution Type [s], p (S=serial, p=parallel)  ${NC}"
+    echo -e "${CYAN}     --onClient      Execute code on client bucket node as well${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket exec code -n n1 -b n1-node1 -c /home/san/script1.sh ${NC}"
+    echo -e "${CYAN}bucket exec code -n n1 -c /home/san/script1.sh ${NC}"
+    echo -e "${CYAN}bucket exec code -n n1 -c /home/san/script1.sh --onClient${NC}"
+    echo -e "${CYAN}bucket exec code -n n1 -c /home/san/script1.sh -et p${NC}"
+    echo -e "${CYAN}bucket exec code -n n1 -c /home/san/script1.sh --onClient -et p${NC} "
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} exec --help' for more information about a command.${NC}"
+    echo
+}
+#########################################################################
+help_bucket_file(){
+    echo -e "${GREEN}file${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Perform File operation to/from bucket nodes${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} file [command]${NC}"
+    echo
+    echo -e "${CYAN}Available Commands:${NC}"
+    echo -e "${CYAN}push         Copy file/s from local machine to one or more bucket nodes${NC}"
+    echo -e "${CYAN}pull         Copy back file from given bucket node to local machine ${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket file -h ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} file --help' for more information about a command.${NC}"
+    echo
+}
+help_bucket_file_push(){
+    echo -e "${GREEN}file push${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Copy back file from given bucket node to local machine${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} file push [flags]${NC}"
+    echo
+    echo -e "${CYAN}Available Flags:${NC}"
+    echo -e "${CYAN}-n,  --namespace     namespaces name${NC}"
+    echo -e "${CYAN}-b,  --bucket        bucket node name (if provided, file will be copied to this given node only)${NC}"
+    echo -e "${CYAN}-f,  --file          File to be copied${NC}"
+    echo -e "${CYAN}-et, --execType      Execution Type [s], p (S=serial, p=parallel)  ${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket file push -n n1 -b n1-node1 -f /home/san/file1.txt ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} file --help' for more information about a command.${NC}"
+    echo
+}
+help_bucket_file_pull(){
+    echo -e "${GREEN}file pull${CYAN} help:-${NC}"
+    echo -e "${CYAN}Description:"
+    echo -e "${CYAN}Copy file/s from local machine to one or more bucket nodes${NC}"
+    echo
+    echo -e "${CYAN}Usage:${NC}"
+    echo -e "${CYAN}${GREEN}bucket${CYAN} file push [flags]${NC}"
+    echo
+    echo -e "${CYAN}Available Flags:${NC}"
+    echo -e "${CYAN}-s,  --source           source file (bucket_node/location/filename) ${NC}"
+    echo -e "${CYAN}-d,  --destination      Destination file on local machine(/location/filename)${NC}"
+    echo
+    echo -e "${CYAN}Universal Flags:${NC}"
+    echo -e "${CYAN}-h, --help            Print help${NC}"
+    echo
+    echo -e "${CYAN}Example:${NC}"
+    echo -e "${CYAN}bucket file push -n n1 -b n1-node1 -f /home/san/file1.txt ${NC}"
+    echo
+    echo -e "${CYAN}Use '${GREEN}bucket${CYAN} file --help' for more information about a command.${NC}"
+    echo
+}

@@ -278,15 +278,15 @@ bucket_create_k8s(){
         done
     fi
     #
-    echo "All node joined to K8s cluster..."
+    echo -e "${GREEN}All node joined to K8s cluster...${NC}"
     bucket_create_rope $clientName "webssh"
     nfsName=$nsName"-nfs1"
     nfsIP=""
     if [[ $csi == "nfs" ]]; then
-        echo "Deploying new NFS node [$nfsName]"
+        echo -e "${CYAN}Deploying new NFS node [${GREEN}$nfsName${CYAN}]${NC}"
         bucket_create_nfs $nsName $profile > /dev/null 2>&1
         sleep 5s
-        echo "configuring NFS dynamic storage provisioner"
+        echo -e "${CYAN}configuring NFS dynamic storage provisioner${NC}"
         nfsIP=$(lxc list $nfsName -c4 --format csv | grep eth0 | awk '{print $1}' | tr -d \")
         lxc file push inside/nfsSC/default-sc.yaml $clientName/root/default-sc.yaml
         lxc file push inside/nfsSC/rbac.yaml $clientName/root/rbac.yaml
@@ -296,11 +296,12 @@ bucket_create_k8s(){
         lxc file push inside/nfsSC/setupNFS.sh $clientName/root/setupNFS.sh
         sleep 1s
         lxc exec $clientName bash /root/setupNFS.sh #> /dev/null 2>&1
+        lxc file push examples/1-pvc-nfs.yaml $clientName/root/1-pvc-nfs.yaml 
+        lxc file push examples/2-busybox-pv-nfs.yaml $clientName/root/2-busybox-pv-nfs.yaml 
     fi
     #
     echo -e "${GREEN}Deployment Duration: $((($(date +%s)-$start)/60)) minutes${NC}"
-    #
-    
+    #  
 }
 #
 bucket_show_k8s(){
