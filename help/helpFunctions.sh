@@ -139,13 +139,15 @@ help_bucket_app_mysql(){
     echo -e "${CYAN}Available Parameters:${NC}"
     echo -e "${CYAN}-n,  --namespace       Attach deloyment to given namespace${NC}"
     echo -e "${CYAN}-p,  --profile         Pass different profile (tiny [mini] mini2 regular regular2 heavy heavy2 heavy3) ${NC}"
-    echo -e "${CYAN}-dt, --deplType        Deploy SQL Server on [node], docker or k8s ${NC}"
     echo -e "${CYAN}-c,  --cred            Set SQL Server SA password as per Microsoft recomendation ${NC}"
-    echo -e "${CYAN}-sn, --sqlNode         If --ha flag is set, pass number of SQL Node to be configured.${NC}"
-    echo -e "${CYAN}-dn, --dataNode        If --ha flag is set, pass number of Data NOde to be configured.${NC}"
     echo
     echo -e "${CYAN}Flags:${NC}"
+    echo -e "${CYAN}     --deplType        Deploy MySQL Instance on [node], docker or k8s ${NC}"
     echo -e "${CYAN}     --ha              Setup SQL Server Always-On Highly available cluster ${NC}"
+    echo -e "${CYAN}     --haType          Deploy MySQL Cluster HA with [innodb], ndb ${NC}"
+    echo -e "${CYAN}     --sqlNode         If haType=ndb , pass number of SQL Node to be configured.${NC}"
+    echo -e "${CYAN}     --dataNode        If haType=ndb, pass number of Data NOde to be configured.${NC}"
+    echo -e "${CYAN}     --replicaNode     If haType=innodb, pass number of Replica nodes to be configured[3].${NC}"
     echo -e "${CYAN}     --withClient      Add client node along with 'webssh' rope to this setup ${NC}"
     echo
     echo -e "${CYAN}Universal Flags:${NC}"

@@ -100,20 +100,24 @@ bucket_app_mssql() {
 }
 #
 bucket_app_mysql() {
-    # $namespace $profile $deplType $ha $saCred $sqlNode $dataNode $withClient
+    # $namespace $profile $saCred $deplType $ha $haType $sqlNode $dataNode $replicaNode $withClient
     nsName=$1
     shift
     profile=$1
+    shift
+    saCred=$1
     shift
     deplType=$1
     shift
     ha=$1
     shift
-    saCred=$1
+    haType=$1
     shift
     sqlNode=$1
     shift
     dataNode=$1
+    shift
+    replicaNode=$1
     shift
     withClient=$1
     #
@@ -157,8 +161,8 @@ bucket_app_mysql() {
     #
     primarySqlNode=$nsName"-mysql1"
     if (( $ha < 1 )); then
-        if (( $replica > 0 )); then
-            echo -e "${RED}Setting up MySQL deployment without HA. Ignoring --sqlNode and --dataNode parameters.${NC}" ;
+        if (( $replicaNode > 0 )); then
+            echo -e "${RED}Setting up MySQL deployment without HA. Ignoring --sqlNode, --dataNode and --replicaNode parameters.${NC}" ;
         fi
         echo -e "${CYAN}Deploying Primary MySQL node...${NC}" ;
         lxc copy sys-mysql $primarySqlNode --profile $profile
@@ -177,11 +181,62 @@ bucket_app_mysql() {
             bucket_create_rope $clientName "webssh"
         fi
     elif (( $ha > 0 )); then
-        if (( $replica < 1 )); then
-            echo -e "${RED}Cannot proceed with given number of replica. Please pass appropriate --replica parameters${NC}" ;
-            exit 1;
+        if [[ $haType == "innodb" ]]; then
+            if (( $replicaNode < 3 )); then
+                echo -e "${RED}Cannot proceed with given number of replica. Please pass appropriate --replicaNode parameter${NC}" ;
+                exit 1;
+            fi
+            echo "here.."
+            for (( c=1; c<=$replicaNode; c++ ))
+            do
+                mysqlName=$nsName"-mysql"$c
+                echo -e "${CYAN}Deploying MySQL Replical node ${GREEN}[$mysqlName]${NC}"
+                lxc copy sys-mysql $mysqlName --profile $profile
+                lxc start $mysqlName
+            done
+            echo -e "${CYAN}Setup and configure MySQL Instances${NC}" ;
+            cat template/deploy-1N-mysql.sh > code/deploy-1N-mysql.sh
+            sed -i -e "s/<sqlcred>/$saCred/g" code/deploy-1N-mysql.sh
+            serverID=101;
+            for (( c=1; c<=$replicaNode; c++ ))
+            do
+                mysqlName=$nsName"-mysql"$c
+                echo -e "${CYAN}Configuring MySQL Replical node ${GREEN}[$mysqlName]${NC}"
+                cat code/deploy-1N-mysql.sh | lxc exec $mysqlName bash
+                sleep 2s
+                cat template/deploy-mm-mysql.sh > code/deploy-mm-mysql.sh
+                sed -i -e "s/<sqlcred>/$saCred/g" code/deploy-mm-mysql.sh
+                sed -i -e "s/<srvid>/$serverID/g" code/deploy-mm-mysql.sh
+                cat code/deploy-mm-mysql.sh | lxc exec $mysqlName bash
+                serverID=$((serverID+1))
+            done
+            echo -e "${CYAN}Deploying MySQL InnoDB cluster and adding replica nodes${NC}" ;
+            cat template/deploy-mm-mysql-cluster.sh > code/deploy-mm-mysql-cluster.sh
+            for (( c=2; c<=$replicaNode; c++ ))
+            do
+                mysqlName=$nsName"-mysql"$c
+                echo "mysqlsh 'root:<sqlcred>'@127.0.0.1:3306 -- cluster add-instance root@$mysqlName --password='<sqlcred>' --recoveryMethod=clone ; >> /root/mysqlInit.log 2>&1" >> code/deploy-mm-mysql-cluster.sh
+                echo "#" >> code/deploy-mm-mysql-cluster.sh
+                echo "" >> code/deploy-mm-mysql-cluster.sh
+            done
+            echo "mysqlsh 'root:<sqlcred>'@localhost:3306 -- cluster status " >> code/deploy-mm-mysql-cluster.sh
+            sed -i -e "s/<sqlcred>/$saCred/g" code/deploy-mm-mysql-cluster.sh
+            cat code/deploy-mm-mysql-cluster.sh | lxc exec $primarySqlNode bash
+            #
+            echo -e "${CYAN}Deploying and configuring MySQL Router${NC}" ;
+            cat template/deploy-mysql-router.sh > code/deploy-mysql-router.sh
+            sed -i -e "s/<sqlcred>/$saCred/g" code/deploy-mysql-router.sh
+            for (( c=2; c<=$replicaNode; c++ ))
+            do
+                mysqlName=$nsName"-mysql"$c
+                cat code/deploy-mysql-router.sh | lxc exec $mysqlName bash
+            done
+            for (( c=2; c<=$replicaNode; c++ ))
+            do
+                mysqlName=$nsName"-mysql"$c
+                lxc exec $mysqlName bash /root/mysqlrouter/start.sh &
+            done
+            echo -e "${GREEN}MySQL Cluster deployed successfully...${NC}"
         fi
-        echo "MSSQL HA deployment is not supported yet. Implementation is in progress.."
-        exit 1;
     fi    
 }

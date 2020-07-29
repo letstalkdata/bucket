@@ -69,11 +69,13 @@ dbtype="standalone";
 deplType="node";
 clusterType="standalone";
 sqlEdition="Developer"
-saCred="Bucket1@sql"
+saCred="Bucket1!sql"
+haType="innodb";
 ha=0;
 replica=0;
 sqlNode=1;
 dataNode=2;
+replicaNode=3;
 cmd1=
 cmd2=
 cmd3=
@@ -652,19 +654,25 @@ while [ "$1" != "" ]; do
                                                 -p | --profile )    shift
                                                     profile=$1
                                                     ;;
-                                                -dt | --deplType )  shift  
+                                                -c | --cred )  shift  
+                                                    saCred=$1
+                                                    ;;
+                                                --deplType )  shift  
                                                     deplType=$1
                                                     ;;
                                                 --ha )  ha=1
                                                     ;;
-                                                -c | --cred )  shift  
-                                                    saCred=$1
+                                                --haType )  shift  
+                                                    haType=$1
                                                     ;;
-                                                -sn | --sqlNode )  shift  
+                                                --sqlNode )  shift  
                                                     sqlNode=$1
                                                     ;;
-                                                -dn | --dataNode )  shift  
+                                                --dataNode )  shift  
                                                     dataNode=$1
+                                                    ;;
+                                                --replicaNode )  shift  
+                                                    replicaNode=$1
                                                     ;;
                                                 --withClient )  withClient=1
                                                     ;;
@@ -676,7 +684,7 @@ while [ "$1" != "" ]; do
                                     ;;
                                 esac
                             shift
-                            bucket_app_mysql $namespace $profile $deplType $ha $saCred $sqlNode $dataNode $withClient
+                            bucket_app_mysql $namespace $profile $saCred $deplType $ha $haType $sqlNode $dataNode $replicaNode $withClient
                         ;;
                         mssql )  shift
                                 cmd2=$1
