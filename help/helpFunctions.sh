@@ -499,7 +499,6 @@ help_bucket_setup_template(){
     echo -e "${CYAN}--mssql         setup MySQL template only${NC}"
     echo -e "${CYAN}--k8s           setup k8s template only${NC}"
     echo -e "${CYAN}--gluster       setup glusterFS template only${NC}"
-    echo -e "${CYAN}--k8s           setup k8s template only${NC}"
     echo -e "${CYAN}--dtr           setup dtr template only${NC}"
     echo -e "${CYAN}--all           setup all templates ${NC}"
     echo
