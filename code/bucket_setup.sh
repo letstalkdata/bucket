@@ -12,6 +12,12 @@ source $BUCKET_HOME/code/gen-helper-function.sh
 #
 bucket_setup_init(){
     echo "Performinig initial configuration..."
+    sudo snap install lxd
+    newgrp lxd
+    sudo usermod -aG lxd $USER
+    sudo lxd --version
+    sudo lxd init --auto
+    #
     sudo apt install -y net-tools > /dev/null 2>&1
     sudo chmod +x bucket
     absPath="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
@@ -19,6 +25,8 @@ bucket_setup_init(){
     finalDir=$(dirname $absDir)
     msg="if [ -d \"$finalDir\" ] ; then PATH=\"$finalDir:\$PATH\"; fi"
     echo $msg >> ~/.profile
+    msg2="export BUCKET_HOME=\$finalDir"
+    echo $msg2 >> ~/.profile
     source ~/.profile
 }
 #
@@ -193,7 +201,7 @@ bucket_setup_template(){
     shift
     ftall=$1
     #
-    echo "fmysql=$fmysql"
+    #echo "fmysql=$fmysql"
     initName="sys-init"
     bucket=$(lxc list $initName --format csv -c n)
     if [[ ! $bucket ]]; then 
