@@ -259,7 +259,7 @@ bucket_setup_template(){
         fi
     fi
     if (( $ftall > 0 )); then
-        testClient=$(lxc list $initName --format csv -c n)
+        testClient=$(lxc list $clientName --format csv -c n)
         if [[ ! $testClient ]]; then 
             bucket_setup_template_client;
         fi
