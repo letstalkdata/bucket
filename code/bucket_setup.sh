@@ -6,8 +6,8 @@ BROWN='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 #
-source config
-source code/gen-helper-function.sh
+source $BUCKET_HOME/config
+source $BUCKET_HOME/code/gen-helper-function.sh
 #
 #
 bucket_setup_init(){

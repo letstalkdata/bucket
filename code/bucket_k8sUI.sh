@@ -6,7 +6,7 @@ BROWN='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 #
-source code/bucket_rope.sh
+source $BUCKET_HOME/code/bucket_rope.sh
 #
 bucket_create_k8sui(){
     echo "K8sUI dashboard deployment process started"

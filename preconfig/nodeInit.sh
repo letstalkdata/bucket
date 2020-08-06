@@ -2,7 +2,8 @@
 #
 yum install -y -q epel-release >> /nodeInit.log 2>&1
 echo "bucket" | passwd --stdin root >> /nodeInit.log 2>&1
-yum install -y -q openssh-server >> /nodeInit.log 2>&1
+yum install -y openssh-server >> /nodeInit.log 2>&1
+systemctl start sshd
 sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 yum install -y -q openssl shellinabox >> /nodeInit.log 2>&1
 systemctl enable shellinaboxd.service >> /nodeInit.log 2>&1

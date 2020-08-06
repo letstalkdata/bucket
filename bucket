@@ -1,22 +1,22 @@
 #!/bin/bash
 #
-source help/helpFunctions.sh
-source code/bucket_create_node.sh
-source code/bucket_create_client.sh
-source code/bucket_create_dtr.sh
-source code/bucket_create_k8s.sh
-source code/bucket_ns.sh
-source code/bucket_rope.sh
-source code/bucket_k8sUI.sh
-source code/bucket_setup.sh
-source code/gen-helper-function.sh
-source code/bucket_gluster.sh
-source code/bucket_nfs.sh
-source code/bucket_mysql.sh
-source code/bucket_list.sh
-source code/bucket_app.sh
-source code/bucket_exec.sh
-source code/bucket_show.sh
+source $BUCKET_HOME/help/helpFunctions.sh
+source $BUCKET_HOME/code/bucket_create_node.sh
+source $BUCKET_HOME/code/bucket_create_client.sh
+source $BUCKET_HOME/code/bucket_create_dtr.sh
+source $BUCKET_HOME/code/bucket_create_k8s.sh
+source $BUCKET_HOME/code/bucket_ns.sh
+source $BUCKET_HOME/code/bucket_rope.sh
+source $BUCKET_HOME/code/bucket_k8sUI.sh
+source $BUCKET_HOME/code/bucket_setup.sh
+source $BUCKET_HOME/code/gen-helper-function.sh
+source $BUCKET_HOME/code/bucket_gluster.sh
+source $BUCKET_HOME/code/bucket_nfs.sh
+source $BUCKET_HOME/code/bucket_mysql.sh
+source $BUCKET_HOME/code/bucket_list.sh
+source $BUCKET_HOME/code/bucket_app.sh
+source $BUCKET_HOME/code/bucket_exec.sh
+source $BUCKET_HOME/code/bucket_show.sh
 #source show/show-func.sh
 #
 nodename="default"

@@ -6,8 +6,8 @@ BROWN='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 #
-source code/bucket_rope.sh
-source code/bucket_nfs.sh
+source $BUCKET_HOME/code/bucket_rope.sh
+source $BUCKET_HOME/code/bucket_nfs.sh
 #
 bucket_create_k8s(){
     #$namespace $profile $k8sVersion $nMaster $nWorker $cni $csi $dtr $noClient

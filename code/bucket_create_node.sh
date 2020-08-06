@@ -102,15 +102,18 @@ bucket_create_node(){
         fi
     done
     nodeName=""
-    for (( c=1; c<=$nMaster; c++ )); do
+    for (( c=1; c<=$nodecount; c++ )) 
+    do
         nodeName=$nsName"-node"$c
-        lxc file push preconfig/nodeInit.sh $nodeName/nodeInit.sh
+        lxc file push preconfig/nodeInit.sh $nodeName/root/nodeInit.sh
     done
     nodeName=""
-    for (( c=1; c<=$nMaster; c++ )); do
+    for (( c=1; c<=$nodecount; c++ )) 
+    do
         nodeName=$nsName"-node"$c
-        lxc exec $nodeName bash /nodeInit.sh &
+        lxc exec $nodeName bash /root/nodeInit.sh &
     done
+    echo -e "${GREEN}Nodes deployed successfully.${NC}"
     clientName=$nsName"-client"
     if (( $withClient > 0 )); then
         lxc file pull sys-dtr/certs/ca.crt configs/ca.crt

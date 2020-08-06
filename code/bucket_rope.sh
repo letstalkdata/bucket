@@ -6,7 +6,7 @@ BROWN='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 #
-source config
+source $BUCKET_HOME/config
 #
 bucket_create_rope(){
     # $bucket $ropeType $hook
