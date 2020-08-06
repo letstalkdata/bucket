@@ -103,8 +103,8 @@ bucket_setup_profile(){
 #
 bucket_setup_template_init() {
     echo "Performinig initial template configuration..."
-    lxc launch images:centos/7 sys-init --profile tiny
-    sleep 3s
+    lxc launch images:centos/7 sys-init --profile mini2
+    sleep 5s
     echo "Initial bootstarp..."
     cat $BUCKET_HOME/preconfig/bootstrap-template.sh | lxc exec sys-init bash
     lxc file push $BUCKET_HOME/code/kube-flannel.yml sys-init/root/kube-flannel.yml
