@@ -287,6 +287,7 @@ bucket_setup_template(){
         if [[ ! $testDtr ]]; then 
             bucket_setup_template_dtr;
         fi
+        #bucket_setup_template_client;
         #bucket_setup_template_mysql;
         #bucket_setup_template_mssql;
         #bucket_setup_template_node;

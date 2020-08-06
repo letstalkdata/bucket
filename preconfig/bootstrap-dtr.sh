@@ -3,7 +3,7 @@
 ip=`hostname -I | awk '{print $1}'`
 hs=$(hostname)
 #
-yum -y install openssl 
+yum -y install openssl >/dev/null 2>&1
 mkdir -p /certs
 #
 # Creating and uploading certificate
