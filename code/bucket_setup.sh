@@ -103,8 +103,8 @@ bucket_setup_profile(){
 #
 bucket_setup_template_init() {
     echo "Performinig initial template configuration..."
-    lxc launch images:centos/7 sys-init --profile mini2
-    sleep 5s
+    lxc launch images:centos/7 sys-init --profile regular
+    sleep 8s
     echo "Initial bootstarp..."
     cat $BUCKET_HOME/preconfig/bootstrap-template.sh | lxc exec sys-init bash
     lxc file push $BUCKET_HOME/code/kube-flannel.yml sys-init/root/kube-flannel.yml
@@ -113,7 +113,7 @@ bucket_setup_template_init() {
 }
 bucket_setup_template_client(){
     echo "Performinig initial client template configuration..."
-    lxc copy sys-init sys-client-v1 --profile mini
+    lxc copy sys-init sys-client-v1 --profile mini2
     lxc start sys-client-v1
     sleep 5s
     cat $BUCKET_HOME/preconfig/bootstrap-client-v1.sh | lxc exec sys-client-v1 bash
@@ -169,7 +169,7 @@ bucket_setup_template_gluster(){
 bucket_setup_template_dtr(){
     echo "Performinig initial dtr template configuration..."
     #: '
-    lxc copy sys-init sys-dtr --profile mini
+    lxc copy sys-init sys-dtr --profile mini2
     lxc start sys-dtr
     sleep 2s
     lxc file push $BUCKET_HOME/images/flannel.tar.gz sys-dtr/root/flannel.tar.gz
@@ -203,40 +203,96 @@ bucket_setup_template(){
     #
     #echo "fmysql=$fmysql"
     initName="sys-init"
-    bucket=$(lxc list $initName --format csv -c n)
-    if [[ ! $bucket ]]; then 
+    clientName="sys-client-v1"
+    nodeName="sys-node"
+    mysqlName="sys-mysql"
+    mssqlName="sys-mssql"
+    k8sName="sys-k8s"
+    glusterName="sys-gluster"
+    dtrName="sys-dtr"
+    #
+    testInit=$(lxc list $initName --format csv -c n)
+    if [[ ! $testInit ]]; then 
         bucket_setup_template_init;
     fi
     #
     if (( $fclient > 0 )); then
-        bucket_setup_template_client;
+        testClient=$(lxc list $clientName --format csv -c n)
+        if [[ ! $testClient ]]; then 
+            bucket_setup_template_client;
+        fi
     fi
     if (( $fnode > 0 )); then
-        bucket_setup_template_node;
+        testNode=$(lxc list $nodeName --format csv -c n)
+        if [[ ! $testNode ]]; then 
+            bucket_setup_template_node;
+        fi
     fi
     if (( $fmysql > 0 )); then
-        bucket_setup_template_mysql;
+        testMysql=$(lxc list $mysqlName --format csv -c n)
+        if [[ ! $testMysql ]]; then 
+            bucket_setup_template_mysql;
+        fi
     fi
     if (( $fmssql > 0 )); then
-        bucket_setup_template_mssql;
+        testMssql=$(lxc list $mssqlName --format csv -c n)
+        if [[ ! $testMssql ]]; then 
+            bucket_setup_template_mssql;
+        fi
     fi
     if (( $fk8s > 0 )); then
-        bucket_setup_template_k8s;
+        testK8s=$(lxc list $k8sName --format csv -c n)
+        if [[ ! $testK8s ]]; then 
+            bucket_setup_template_k8s;
+        fi
     fi
     if (( $fglust > 0 )); then
-        bucket_setup_template_gluster;
+        testGluster=$(lxc list $glusterName --format csv -c n)
+        if [[ ! $testGluster ]]; then 
+            bucket_setup_template_gluster;
+        fi
     fi
     if (( $fdtr > 0 )); then
-        bucket_setup_template_dtr;
+        testDtr=$(lxc list $dtrName --format csv -c n)
+        if [[ ! $testDtr ]]; then 
+            bucket_setup_template_dtr;
+        fi
     fi
     if (( $ftall > 0 )); then
-        bucket_setup_template_client;
-        bucket_setup_template_mysql;
-        bucket_setup_template_mssql;
-        bucket_setup_template_node;
-        bucket_setup_template_k8s;
-        bucket_setup_template_gluster;
-        bucket_setup_template_dtr;
+        testClient=$(lxc list $initName --format csv -c n)
+        if [[ ! $testClient ]]; then 
+            bucket_setup_template_client;
+        fi
+        testNode=$(lxc list $nodeName --format csv -c n)
+        if [[ ! $testNode ]]; then 
+            bucket_setup_template_node;
+        fi
+        testMysql=$(lxc list $mysqlName --format csv -c n)
+        if [[ ! $testMysql ]]; then 
+            bucket_setup_template_mysql;
+        fi
+        testMssql=$(lxc list $mssqlName --format csv -c n)
+        if [[ ! $testMssql ]]; then 
+            bucket_setup_template_mssql;
+        fi
+        testK8s=$(lxc list $k8sName --format csv -c n)
+        if [[ ! $testK8s ]]; then 
+            bucket_setup_template_k8s;
+        fi
+        testGluster=$(lxc list $glusterName --format csv -c n)
+        if [[ ! $testGluster ]]; then 
+            bucket_setup_template_gluster;
+        fi
+        testDtr=$(lxc list $dtrName --format csv -c n)
+        if [[ ! $testDtr ]]; then 
+            bucket_setup_template_dtr;
+        fi
+        #bucket_setup_template_mysql;
+        #bucket_setup_template_mssql;
+        #bucket_setup_template_node;
+        #bucket_setup_template_k8s;
+        #bucket_setup_template_gluster;
+        #bucket_setup_template_dtr;
     fi
 }
 #
