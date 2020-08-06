@@ -29,10 +29,10 @@ bucket_create_gluster() {
         echo -e "${RED}Can not create glusterFS cluster in [default] namespace. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Creating namespace.${NC}";
-        echo $nsName >> db/ns.csv
+        echo $nsName >> $BUCKET_HOME/db/ns.csv
         echo -e "${CYAN}New namespace ${GREEN}[$nsName]${CYAN} created successfully${NC}"   
     fi
     profileCheck=$(case $profile in tiny|mini|mini2|regular|regular2|heavy|heavy2|heavy3) echo yes;; *)  echo no;; esac)
@@ -63,14 +63,14 @@ bucket_create_gluster() {
     fi
     #
     start=`date +%s`
-    lxc file pull sys-dtr/certs/ca.crt configs/ca.crt
+    lxc file pull sys-dtr/certs/ca.crt $BUCKET_HOME/configs/ca.crt
     clientName=$nsName"-client"
     #
     if (( $noClient < 1 )); then
         echo -e "${CYAN}Deploying client node to access the glusterFS cluster.${GREEN}[$clientName]${NC}"
         lxc copy $clientTemplate $clientName --profile mini
         lxc start $clientName
-        lxc file push configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        lxc file push $BUCKET_HOME/configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
     fi
     imgName=""
     for (( c=1; c<=$glusterNode; c++ ))
@@ -85,7 +85,7 @@ bucket_create_gluster() {
         #
         ldName=$(sudo losetup -f)
         ldNo=$(echo $ldName | sed 's/\/dev\/loop//') 
-        imgName="loopDevice/loop-"$ldNo".img"
+        imgName=$BUCKET_HOME"/loopDevice/loop-"$ldNo".img"
         volumeMB=$(($volumeGB * 1000))
         cnt=$(($volumeMB / 100))
         dd if=/dev/zero of=$imgName bs=100M count=$cnt
@@ -102,11 +102,11 @@ bucket_create_gluster() {
         find1="<device>"
         find2="<mountLocation>"
         #
-        cat template/mount.sh > loopDevice/mount.sh
-        sed -i "s/<device>/$ldDeviceesc/g" loopDevice/mount.sh
-        sed -i "s/<mountLocation>/$mntLocesc/g" loopDevice/mount.sh
+        cat $BUCKET_HOME/template/mount.sh > $BUCKET_HOME/loopDevice/mount.sh
+        sed -i "s/<device>/$ldDeviceesc/g" $BUCKET_HOME/loopDevice/mount.sh
+        sed -i "s/<mountLocation>/$mntLocesc/g" $BUCKET_HOME/loopDevice/mount.sh
         #
-        cat loopDevice/mount.sh | lxc exec $gname bash
+        cat $BUCKET_HOME/loopDevice/mount.sh | lxc exec $gname bash
         #
         lxc exec $gname mkdir /mnt/dvc1/brick
         lxc exec $gname mkdir /mnt/dvc1/brick/1
@@ -122,18 +122,18 @@ bucket_create_gluster() {
         fi
     done
     #
-    cat template/glusterVolume.sh > loopDevice/glusterVolume.sh
+    cat $BUCKET_HOME/template/glusterVolume.sh > $BUCKET_HOME/loopDevice/glusterVolume.sh
     gname=""
     for (( c=1; c<=$glusterNode; c++ ))
     do
         gname=$nsName"-gluster"$c
-        echo -n "$gname:/mnt/dvc1/brick/1 " >> loopDevice/glusterVolume.sh
+        echo -n "$gname:/mnt/dvc1/brick/1 " >> $BUCKET_HOME/loopDevice/glusterVolume.sh
     done
-    echo "" >> loopDevice/glusterVolume.sh
-    echo "gluster volume start xfsvol1" >> loopDevice/glusterVolume.sh
-    echo "gluster volume status xfsvol1" >> loopDevice/glusterVolume.sh
-    echo "gluster volume info xfsvol1" >> loopDevice/glusterVolume.sh
-    cat loopDevice/glusterVolume.sh | lxc exec $headGluster bash 
+    echo "" >> $BUCKET_HOME/loopDevice/glusterVolume.sh
+    echo "gluster volume start xfsvol1" >> $BUCKET_HOME/loopDevice/glusterVolume.sh
+    echo "gluster volume status xfsvol1" >> $BUCKET_HOME/loopDevice/glusterVolume.sh
+    echo "gluster volume info xfsvol1" >> $BUCKET_HOME/loopDevice/glusterVolume.sh
+    cat $BUCKET_HOME/loopDevice/glusterVolume.sh | lxc exec $headGluster bash 
     #
     echo -e "${GREEN}GlusterFS Cluster Creation Duration: $((($(date +%s)-$start)/60)) minutes${NC}"
     bucket_create_rope $headGluster "webssh"
@@ -151,14 +151,14 @@ bucket_delete_gluster() {
         echo -e "${GREEN}[default] ${RED}namespace can not be deleted. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Nothing to do.${NC}";
         exit 0;
     fi
     bucket=$(lxc list $nsName --format csv -c n)
     if [[ ! $bucket ]]; then 
-        sed -i "/$nsName/d" ./db/ns.csv
+        sed -i "/$nsName/d" $BUCKET_HOME/db/ns.csv
         echo -e "${GREEN}namespace [$nsName] deleted successfully.${NC}" ;
         exit 0;
     fi
@@ -173,13 +173,13 @@ bucket_delete_gluster() {
             lxc list $nsName --format csv -c n | while read -r line ; do
                 ldNo=$(lxc config device list $line | grep ldDisk | cut -d'-' -f2)
                 ldDevice="/dev/loop"$ldNo
-                img="loopDevice/loop-"$ldNo".img"
+                img=$BUCKET_HOME"/loopDevice/loop-"$ldNo".img"
                 sudo losetup -d $ldDevice
                 sudo rm -rf $ldDevice
                 rm -rf $img
             done
             lxc delete -f $(lxc list $nsName --format csv -c n)
-            sed -i "/$nsName/d" ./db/ns.csv
+            sed -i "/$nsName/d" $BUCKET_HOME/db/ns.csv
             echo -e "${GREEN}Namespace [$nsName] for glusterFS deployment deleted successfully.${NC}"
             ;;
         n|N ) 

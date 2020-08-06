@@ -19,10 +19,10 @@ bucket_create_client(){
         echo -e "${GREEN}[sys] ${RED}namespace is reserved. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Creating provided namespace.${NC}";
-        echo $nsName >> db/ns.csv
+        echo $nsName >> $BUCKET_HOME/db/ns.csv
         echo -e "${CYAN}New namespace ${GREEN}[$nsName]${CYAN} created Succesfully${NC}"   
     fi
     if [[ $clientName == "default" ]]; then 

@@ -15,7 +15,7 @@ bucket_list_node() {
 }
 #
 bucket_list_ns(){
-    cat db/ns.csv  | column -t -s "|"
+    cat $BUCKET_HOME/db/ns.csv  | column -t -s "|"
 }
 #
 bucket_list_rope(){

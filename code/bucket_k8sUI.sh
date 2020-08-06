@@ -21,7 +21,7 @@ bucket_create_k8sui(){
         echo -e "${RED}Can not create Kubernetes cluster in [default] namespace. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Exiting...${NC}";
         exit 1; 
@@ -29,11 +29,11 @@ bucket_create_k8sui(){
     clientCNTR=$nsName"-client"
     masterCNTR=$nsName"-kmaster1"
     #
-    lxc file push configs/1-influxdb.yaml $clientCNTR/root/1-influxdb.yaml
-    lxc file push configs/2-heapster.yaml $clientCNTR/root/2-heapster.yaml
-    lxc file push configs/3-dashboard.yaml $clientCNTR/root/3-dashboard.yaml
-    lxc file push configs/4-sa_cluster_admin.yaml $clientCNTR/root/4-sa_cluster_admin.yaml
-    lxc file push configs/deployUI.sh $clientCNTR/root/deployUI.sh
+    lxc file push $BUCKET_HOME/configs/1-influxdb.yaml $clientCNTR/root/1-influxdb.yaml
+    lxc file push $BUCKET_HOME/configs/2-heapster.yaml $clientCNTR/root/2-heapster.yaml
+    lxc file push $BUCKET_HOME/configs/3-dashboard.yaml $clientCNTR/root/3-dashboard.yaml
+    lxc file push $BUCKET_HOME/configs/4-sa_cluster_admin.yaml $clientCNTR/root/4-sa_cluster_admin.yaml
+    lxc file push $BUCKET_HOME/configs/deployUI.sh $clientCNTR/root/deployUI.sh
     #
     lxc exec $clientCNTR bash /root/deployUI.sh
     #
@@ -51,7 +51,7 @@ bucket_show_k8sui(){
         echo -e "${RED}Can not create Kubernetes cluster in [default] namespace. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Exiting...${NC}";
         exit 1; 

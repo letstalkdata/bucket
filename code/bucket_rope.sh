@@ -37,7 +37,7 @@ bucket_create_rope(){
         loc=$(lxc list $cntr -c L --format csv)
         hostIP=$(lxc cluster list --format csv | grep $loc | cut -d',' -f2 | cut -d':' -f2 | cut -d'/' -f3)
     fi
-    curr=$(sort -nrk1,1 db/hooks.csv | head -1)
+    curr=$(sort -nrk1,1 $BUCKET_HOME/db/hooks.csv | head -1)
     nxt=$(( curr + 1 ))
     device="rope-"$ropeType"-"$nxt
     listen="tcp:0.0.0.0:"$nxt
@@ -53,7 +53,7 @@ bucket_create_rope(){
     cmd="lxc config device add $cntr $device proxy listen=$listen connect=$connect"
     eval "$cmd" >/dev/null 2>&1
     echo
-    echo $nxt >> db/hooks.csv
+    echo $nxt >> $BUCKET_HOME/db/hooks.csv
     msg="Bucket [$cntr] is connect with [$ropeType] rope type on [$hook] hook"
     echo -e "${GREEN}$msg${NC}"
     if [[ $ropeType == "ssh" ]]; then 
@@ -94,7 +94,7 @@ bucket_delete_rope(){
     port=$(lxc config device show $bucket | grep rope | cut -d':' -f1 | cut -d'-' -f3)
     ropeType=$(lxc config device show $bucket | grep rope | cut -d':' -f1 | cut -d'-' -f2)
     lxc config device remove $bucket $ropeName
-    sed -i "/$port/d" ./db/hooks.csv
+    sed -i "/$port/d" $BUCKET_HOME/db/hooks.csv
     
 } 
 #

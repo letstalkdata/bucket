@@ -8,6 +8,6 @@ NC='\033[0m' # No Color
 #
 lxc launch images:centos/7 sys-dtr --profile mini
 sleep 5s
-cat bootstrap-dtr.sh | lxc exec sys-dtr bash
+cat $BUCKET_HOME/bootstrap-dtr.sh | lxc exec sys-dtr bash
 #
 echo -e "${CYAN}sys-dtr deployed successfully ${NC}"

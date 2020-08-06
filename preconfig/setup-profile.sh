@@ -7,20 +7,20 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 #
 ## Setup Profile
-lxc profile show default > preconfig/profile-fixed.sh
-sed -i '/config/d' preconfig/profile-fixed.sh
-sed -i '/description/d' preconfig/profile-fixed.sh
-sed -i 's/name: default/name: <name>/' preconfig/profile-fixed.sh
+lxc profile show default > $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '/config/d' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '/description/d' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i 's/name: default/name: <name>/' $BUCKET_HOME/preconfig/profile-fixed.sh
 #
-sed -i '1s/^/description: LXD profile for <name> bucket\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/  security.privileged: "true"\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/  security.nesting: "true"\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/  raw.lxc: "lxc.apparmor.profile=unconfined\\nlxc.cap.drop= \\nlxc.cgroup.devices.allow=a\\nlxc.mount.auto=proc:rw sys:rw"\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/  linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,overlay\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/  limits.memory.swap: "false"\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/  limits.memory: <mem>\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/  limits.cpu: <cpu>\n/' preconfig/profile-fixed.sh
-sed -i '1s/^/config:\n/' preconfig/profile-fixed.sh
+sed -i '1s/^/description: LXD profile for <name> bucket\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/  security.privileged: "true"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/  security.nesting: "true"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/  raw.lxc: "lxc.apparmor.profile=unconfined\\nlxc.cap.drop= \\nlxc.cgroup.devices.allow=a\\nlxc.mount.auto=proc:rw sys:rw"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/  linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,overlay\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/  limits.memory.swap: "false"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/  limits.memory: <mem>\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/  limits.cpu: <cpu>\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+sed -i '1s/^/config:\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
 echo "fixed profile created.."
 #
 cpu="1"
@@ -60,8 +60,8 @@ do
 		*) exit 1;
 	esac
 	yaml=""
-	yaml="profile/new-"$name"-profile.yaml"
-	sed "s/$find1/$name/" preconfig/profile-fixed.sh > $yaml
+	yaml=$BUCKET_HOME"/profile/new-"$name"-profile.yaml"
+	sed "s/$find1/$name/" $BUCKET_HOME/preconfig/profile-fixed.sh > $yaml
 	sed -i "s/$find2/$cpu/" $yaml 
 	sed -i "s/$find3/$mem/" $yaml
 	#

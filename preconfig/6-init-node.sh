@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 #
 lxc launch images:centos/7 sys-node --profile mini2
 sleep 5s
-cat bootstrap-node.sh | lxc exec sys-node bash
+cat $BUCKET_HOME/bootstrap-node.sh | lxc exec sys-node bash
 lxc stop sys-node
 #
 echo -e "${CYAN} sys-node deployed successfully ${NC}"

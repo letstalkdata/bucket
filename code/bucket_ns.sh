@@ -17,9 +17,9 @@ bucket_create_ns(){
         echo -e "${GREEN}[sys] ${RED}namespace is reserved. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
-        echo $nsName >> db/ns.csv
+        echo $nsName >> $BUCKET_HOME/db/ns.csv
         echo -e "${GREEN}Namespace${CYAN} $nsName${GREEN} has been created successfully.${NC}";
     else
         echo -e "${RED}Provided namespace name ${CYAN}$nsName${RED} is alraedy exists! kindly provide another name.${NC}"; 
@@ -39,14 +39,14 @@ bucket_delete_ns(){
         echo -e "${GREEN}[default] ${RED}namespace can not be deleted. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Nothing to do.${NC}";
         exit 0;
     fi
     bucket=$(lxc list $nsName --format csv -c n)
     if [[ ! $bucket ]]; then 
-        sed -i "/$nsName/d" ./db/ns.csv
+        sed -i "/$nsName/d" $BUCKET_HOME/db/ns.csv
         echo -e "${GREEN}namespace [$nsName] deleted successfully.${NC}" ;
         exit 0;
     fi
@@ -70,7 +70,7 @@ bucket_delete_ns(){
                 lxc delete -f $line
             done
             #lxc delete -f $(lxc list $nsName --format csv -c n)
-            sed -i "/$nsName/d" ./db/ns.csv
+            sed -i "/$nsName/d" $BUCKET_HOME/db/ns.csv
             echo -e "${GREEN}Namespace [$nsName] deleted successfully.${NC}"
             ;;
         n|N ) 
@@ -85,5 +85,5 @@ bucket_delete_ns(){
 }
 #
 bucket_show_ns(){
-    cat db/ns.csv  | column -t -s "|"
+    cat $BUCKET_HOME/db/ns.csv  | column -t -s "|"
 }

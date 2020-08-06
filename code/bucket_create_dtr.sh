@@ -21,10 +21,10 @@ bucket_create_dtr(){
         echo -e "${RED}Can not create local docker registry in [default] namespace. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Creating namespace.${NC}";
-        echo $nsName >> db/ns.csv
+        echo $nsName >> $BUCKET_HOME/db/ns.csv
         echo -e "${CYAN}New namespace ${GREEN}[$nsName]${CYAN} created successfully${NC}"   
     fi
     if [[ $nodeName == "default" ]]; then 
@@ -40,5 +40,5 @@ bucket_create_dtr(){
     fi
     lxc launch images:centos/7 $newDtrName --profile $profile
     sleep 5s
-    cat preconfig/bootstrap-dtr.sh | lxc exec $newDtrName bash
+    cat $BUCKET_HOME/preconfig/bootstrap-dtr.sh | lxc exec $newDtrName bash
 }

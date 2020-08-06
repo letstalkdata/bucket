@@ -25,20 +25,20 @@ bucket_setup_init(){
 bucket_setup_profile(){
     echo "Performinig initial profile configuration..."
     ## Setup Profile
-    lxc profile show default > preconfig/profile-fixed.sh
-    sed -i '/config/d' preconfig/profile-fixed.sh
-    sed -i '/description/d' preconfig/profile-fixed.sh
-    sed -i 's/name: default/name: <name>/' preconfig/profile-fixed.sh
+    lxc profile show default > $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '/config/d' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '/description/d' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i 's/name: default/name: <name>/' $BUCKET_HOME/preconfig/profile-fixed.sh
     #
-    sed -i '1s/^/description: LXD profile for <name> bucket\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/  security.privileged: "true"\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/  security.nesting: "true"\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/  raw.lxc: "lxc.apparmor.profile=unconfined\\nlxc.cap.drop= \\nlxc.cgroup.devices.allow=a\\nlxc.mount.auto=proc:rw sys:rw"\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/  linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,overlay\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/  limits.memory.swap: "false"\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/  limits.memory: <mem>\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/  limits.cpu: <cpu>\n/' preconfig/profile-fixed.sh
-    sed -i '1s/^/config:\n/' preconfig/profile-fixed.sh
+    sed -i '1s/^/description: LXD profile for <name> bucket\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/  security.privileged: "true"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/  security.nesting: "true"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/  raw.lxc: "lxc.apparmor.profile=unconfined\\nlxc.cap.drop= \\nlxc.cgroup.devices.allow=a\\nlxc.mount.auto=proc:rw sys:rw"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/  linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,overlay\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/  limits.memory.swap: "false"\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/  limits.memory: <mem>\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/  limits.cpu: <cpu>\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
+    sed -i '1s/^/config:\n/' $BUCKET_HOME/preconfig/profile-fixed.sh
     echo "fixed profile created.."
     #
     cpu="1"
@@ -78,8 +78,8 @@ bucket_setup_profile(){
             *) exit 1;
         esac
         yaml=""
-        yaml="profile/new-"$name"-profile.yaml"
-        sed "s/$find1/$name/" preconfig/profile-fixed.sh > $yaml
+        yaml=$BUCKET_HOME"/profile/new-"$name"-profile.yaml"
+        sed "s/$find1/$name/" $BUCKET_HOME/preconfig/profile-fixed.sh > $yaml
         sed -i "s/$find2/$cpu/" $yaml 
         sed -i "s/$find3/$mem/" $yaml
         #
@@ -98,8 +98,8 @@ bucket_setup_template_init() {
     lxc launch images:centos/7 sys-init --profile tiny
     sleep 3s
     echo "Initial bootstarp..."
-    cat preconfig/bootstrap-template.sh | lxc exec sys-client-v1 bash
-    lxc file push code/kube-flannel.yml sys-init/root/kube-flannel.yml
+    cat $BUCKET_HOME/preconfig/bootstrap-template.sh | lxc exec sys-client-v1 bash
+    lxc file push $BUCKET_HOME/code/kube-flannel.yml sys-init/root/kube-flannel.yml
     lxc stop sys-init
     echo -e "${CYAN}Initial template configured successfully ${NC}"
 }
@@ -108,7 +108,7 @@ bucket_setup_template_client(){
     lxc copy sys-init sys-client-v1 --profile mini
     lxc start sys-client-v1
     sleep 5s
-    cat preconfig/bootstrap-client-v1.sh | lxc exec sys-client-v1 bash
+    cat $BUCKET_HOME/preconfig/bootstrap-client-v1.sh | lxc exec sys-client-v1 bash
     lxc stop sys-client-v1
     echo -e "${CYAN}Client template configured successfully ${NC}"
 }
@@ -118,7 +118,7 @@ bucket_setup_template_node(){
     lxc copy sys-init sys-node --profile mini2
     lxc start sys-node
     sleep 3s
-    cat preconfig/bootstrap-node.sh | lxc exec sys-node bash
+    cat $BUCKET_HOME/preconfig/bootstrap-node.sh | lxc exec sys-node bash
     lxc stop sys-node
     echo -e "${CYAN} Node template configured successfully ${NC}"
 }
@@ -127,7 +127,7 @@ bucket_setup_template_mysql() {
     lxc copy sys-init sys-mysql --profile mini2
     lxc start sys-mysql
     sleep 3s
-    cat preconfig/bootstrap-mysql.sh | lxc exec sys-mysql bash
+    cat $BUCKET_HOME/preconfig/bootstrap-mysql.sh | lxc exec sys-mysql bash
     lxc stop sys-mysql
     echo -e "${CYAN}MySQL template configured successfully ${NC}"
 }
@@ -135,7 +135,7 @@ bucket_setup_template_mssql() {
     lxc copy sys-init sys-mssql --profile mini2
     lxc start sys-mssql
     sleep 3s
-    cat preconfig/bootstrap-mssql.sh | lxc exec sys-mssql bash
+    cat $BUCKET_HOME/preconfig/bootstrap-mssql.sh | lxc exec sys-mssql bash
     lxc stop sys-mssql
     echo -e "${CYAN}MSSQL template configured successfully ${NC}"
 }
@@ -145,7 +145,7 @@ bucket_setup_template_k8s(){
     lxc copy sys-init sys-k8s --profile mini2
     lxc start sys-k8s
     sleep 2s
-    cat preconfig/bootstrap-k8s.sh | lxc exec sys-k8s bash
+    cat $BUCKET_HOME/preconfig/bootstrap-k8s.sh | lxc exec sys-k8s bash
     lxc stop sys-k8s
     echo -e "${CYAN} k8s template configured successfully ${NC}"
 }
@@ -153,7 +153,7 @@ bucket_setup_template_gluster(){
     echo "Performinig initial glusterFS template configuration..."
     lxc copy sys-init sys-gluster --profile mini2
     sleep 3s
-    cat preconfig/bootstrap-gluster.sh | lxc exec sys-gluster bash
+    cat $BUCKET_HOME/preconfig/bootstrap-gluster.sh | lxc exec sys-gluster bash
     lxc stop sys-gluster
     echo -e "${CYAN} glusterFS template configured successfully ${NC}"
 }
@@ -164,11 +164,11 @@ bucket_setup_template_dtr(){
     lxc copy sys-init sys-dtr --profile mini
     lxc start sys-dtr
     sleep 2s
-    lxc file push images/flannel.tar.gz sys-dtr/root/flannel.tar.gz
-    cat preconfig/bootstrap-dtr.sh | lxc exec sys-dtr bash
+    lxc file push $BUCKET_HOME/images/flannel.tar.gz sys-dtr/root/flannel.tar.gz
+    cat $BUCKET_HOME/preconfig/bootstrap-dtr.sh | lxc exec sys-dtr bash
     #
     if [[ $withBDC == "yes" ]]; then 
-        cat preconfig/bdc-images.sh | lxc exec sys-dtr bash
+        cat $BUCKET_HOME/preconfig/bdc-images.sh | lxc exec sys-dtr bash
     fi
     #'
     echo -e "${CYAN}dtr template configured successfully ${NC}"

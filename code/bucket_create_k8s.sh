@@ -42,10 +42,10 @@ bucket_create_k8s(){
         echo -e "${RED}Can not create Kubernetes cluster in [default] namespace. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Creating namespace.${NC}";
-        echo $nsName >> db/ns.csv
+        echo $nsName >> $BUCKET_HOME/db/ns.csv
         echo -e "${CYAN}New namespace ${GREEN}[$nsName]${CYAN} created successfully${NC}"   
     fi
     profileCheck=$(case $profile in tiny|mini|mini2|regular|regular2|heavy|heavy2|heavy3) echo yes;; *)  echo no;; esac)
@@ -123,13 +123,13 @@ bucket_create_k8s(){
     start=`date +%s`
     finalmsg=""
     # Setup Client node
-    lxc file pull sys-dtr/certs/ca.crt configs/ca.crt
+    lxc file pull sys-dtr/certs/ca.crt $BUCKET_HOME/configs/ca.crt
     clientName=$nsName"-client"
     if (( $noClient < 1 )); then
         echo -e "${CYAN}Deploying client node to access the cluster.${GREEN}[$clientName]${NC}"
         lxc copy $nodeTemplate $clientName --profile mini
         lxc start $clientName
-        lxc file push configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        lxc file push $BUCKET_HOME/configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
     fi
     # Setup Load balancer
     if (( $nMaster > 1 )); then
@@ -137,7 +137,7 @@ bucket_create_k8s(){
         echo -e "${CYAN}Deploying K8s Loadbalancer node ${GREEN}[$lbname]${NC}"
         lxc copy $nodeTemplate $lbname --profile mini
         lxc start $lbname
-        lxc file push configs/ca.crt $lbname/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        lxc file push $BUCKET_HOME/configs/ca.crt $lbname/etc/docker/certs.d/sys-dtr:5000/ca.crt
     fi
     ## Deploy K8s master nodes 
     for (( c=1; c<=$nMaster; c++ ))
@@ -146,7 +146,7 @@ bucket_create_k8s(){
         echo -e "${CYAN}Deploying K8s master node ${GREEN}[$mname]${NC}"
         lxc copy $workerTemplate $mname --profile mini
         lxc start $mname
-        lxc file push configs/ca.crt $mname/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        lxc file push $BUCKET_HOME/configs/ca.crt $mname/etc/docker/certs.d/sys-dtr:5000/ca.crt
     done
     #
     # Deploy k8s worker Nodes
@@ -156,7 +156,7 @@ bucket_create_k8s(){
         echo -e "${CYAN}Deploying K8s worker node ${GREEN}[$wname]${NC}"
         lxc copy $workerTemplate $wname --profile $profile
         lxc start $wname
-        lxc file push configs/ca.crt $wname/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        lxc file push $BUCKET_HOME/configs/ca.crt $wname/etc/docker/certs.d/sys-dtr:5000/ca.crt
     done
     #
     #dur=$(( $(((($(date +%s)-$start)/60)) + 1 ))
@@ -165,28 +165,28 @@ bucket_create_k8s(){
     # One Node K8s setup deployment
     if (( $nMaster == 1 )); then
         echo -e "${CYAN}Initializing K8s master nodes${NC}"
-        lxc file push configs/ca.crt $masternode/etc/docker/certs.d/sys-dtr:5000/ca.crt
-        cat code/deploy-1m-master.sh | lxc exec $masternode bash
+        lxc file push $BUCKET_HOME/configs/ca.crt $masternode/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        cat $BUCKET_HOME/code/deploy-1m-master.sh | lxc exec $masternode bash
         sleep 2s
-        lxc file pull $masternode/joincluster.sh configs/join1mcluster.sh
-        sed  -i '1i sleep 2s' configs/join1mcluster.sh
-        sed  -i '1i mknod /dev/kmsg c 1 11 > /dev/null 2>&1' configs/join1mcluster.sh
-        truncate --size -1 configs/join1mcluster.sh
-        echo " > /dev/null 2>&1" >>configs/join1mcluster.sh
+        lxc file pull $masternode/joincluster.sh $BUCKET_HOME/configs/join1mcluster.sh
+        sed  -i '1i sleep 2s' $BUCKET_HOME/configs/join1mcluster.sh
+        sed  -i '1i mknod /dev/kmsg c 1 11 > /dev/null 2>&1' $BUCKET_HOME/configs/join1mcluster.sh
+        truncate --size -1 $BUCKET_HOME/configs/join1mcluster.sh
+        echo " > /dev/null 2>&1" >> $BUCKET_HOME/configs/join1mcluster.sh
         #
         for (( c=1; c<=$nWorker; c++ )); do
             wname=$nsName"-kworker"$c
             echo -e "${CYAN}Joining worker node ${CYAN}[$wname] to the cluster${NC}"
-            lxc file push configs/join1mcluster.sh $wname/joincluster.sh
-            lxc file push configs/ca.crt $wname/etc/docker/certs.d/sys-dtr:5000/ca.crt
+            lxc file push $BUCKET_HOME/configs/join1mcluster.sh $wname/joincluster.sh
+            lxc file push $BUCKET_HOME/configs/ca.crt $wname/etc/docker/certs.d/sys-dtr:5000/ca.crt
             lxc exec $wname bash /joincluster.sh &
         done
-        lxc exec $masternode cat /etc/kubernetes/admin.conf > configs/k8s-admin.conf
+        lxc exec $masternode cat /etc/kubernetes/admin.conf > $BUCKET_HOME/configs/k8s-admin.conf
         #cat configs/k8s-admin.conf > $HOME/.kube/config
         #lxc exec $clientName bash mkdir -p /root/.kube
-        lxc file push configs/k8s-admin.conf $clientName/root/.kube/config
-        rm -rf configs/join1mcluster.sh
-        rm -rf configs/k8s-admin.conf
+        lxc file push $BUCKET_HOME/configs/k8s-admin.conf $clientName/root/.kube/config
+        rm -rf $BUCKET_HOME/configs/join1mcluster.sh
+        rm -rf $BUCKET_HOME/configs/k8s-admin.conf
     fi
     #
     #############################################################
@@ -197,15 +197,15 @@ bucket_create_k8s(){
         lbip=$(lxc list $lbname -c4 --format csv | grep eth0 | awk '{print $1}' | tr -d \")
         #echo "lbip=$lbip "
         echo -e "${CYAN}Configuring K8s Loadbalancer node ${GREEN}[$lbname]${NC}"
-        echo "#!/bin/bash" > code/nginix-config.sh
-        echo "#" > code/nginix-config.sh
-        echo "mkdir -p /etc/nginx" >> code/nginix-config.sh
-        echo "cat >>/etc/nginx/nginx.conf<<EOF" >> code/nginix-config.sh
-        echo "events { }" >> code/nginix-config.sh
-        echo "" >> code/nginix-config.sh
-        echo "stream {" >> code/nginix-config.sh
-        echo "    upstream stream_backend {" >> code/nginix-config.sh
-        echo "        least_conn;" >> code/nginix-config.sh
+        echo "#!/bin/bash" > $BUCKET_HOME/code/nginix-config.sh
+        echo "#" > $BUCKET_HOME/code/nginix-config.sh
+        echo "mkdir -p /etc/nginx" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "cat >>/etc/nginx/nginx.conf<<EOF" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "events { }" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "stream {" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "    upstream stream_backend {" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "        least_conn;" >> $BUCKET_HOME/code/nginix-config.sh
         #echo "        server <node1>:6443 ;" >> code/nginix-config.sh
         #cat template/nginx-config.sh > code/deploy-nginx-lb.sh
         itr=1
@@ -214,66 +214,66 @@ bucket_create_k8s(){
             mname=$nsName"-kmaster"$c
             masterip=$(lxc list $mname -c4 --format csv | grep eth0 | awk '{print $1}'| tr -d \")
             srv="server $masterip:6443 ;"
-            echo "        $srv" >> code/nginix-config.sh
+            echo "        $srv" >> $BUCKET_HOME/code/nginix-config.sh
             #find="<node$itr>"
             #sed -i -e "s/$find/$masterip/g" code/deploy-nginx-lb.sh
             itr=$((itr+1))
         done
         #
-        echo "    }" >> code/nginix-config.sh
-        echo "    server {" >> code/nginix-config.sh
-        echo "        listen        6443 ;" >> code/nginix-config.sh
-        echo "        proxy_pass    stream_backend ;" >> code/nginix-config.sh
-        echo "        proxy_timeout 3s ;" >> code/nginix-config.sh
-        echo "        proxy_connect_timeout 1s ;" >> code/nginix-config.sh
-        echo "    }" >> code/nginix-config.sh
-        echo "}" >> code/nginix-config.sh
-        echo "EOF" >> code/nginix-config.sh
-        echo "#" >> code/nginix-config.sh
-        echo "docker pull nginx > /dev/null 2>&1" >> code/nginix-config.sh
-        echo "#" >> code/nginix-config.sh
-        echo "docker run --name proxy --restart=always -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro -p 6443:6443 -d nginx > /dev/null 2>&1" >> code/nginix-config.sh
-        echo "#" >> code/nginix-config.sh
-        echo "sleep 3s" >> code/nginix-config.sh
-        echo "#" >> code/nginix-config.sh
-        echo "docker container ls" >> code/nginix-config.sh
+        echo "    }" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "    server {" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "        listen        6443 ;" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "        proxy_pass    stream_backend ;" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "        proxy_timeout 3s ;" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "        proxy_connect_timeout 1s ;" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "    }" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "}" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "EOF" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "#" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "docker pull nginx > /dev/null 2>&1" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "#" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "docker run --name proxy --restart=always -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro -p 6443:6443 -d nginx > /dev/null 2>&1" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "#" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "sleep 3s" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "#" >> $BUCKET_HOME/code/nginix-config.sh
+        echo "docker container ls" >> $BUCKET_HOME/code/nginix-config.sh
         #
-        cat code/nginix-config.sh | lxc exec $lbname bash 
-        rm -rf code/deploy-nginx-lb.sh
+        cat $BUCKET_HOME/code/nginix-config.sh | lxc exec $lbname bash 
+        rm -rf $BUCKET_HOME/code/deploy-nginx-lb.sh
         echo -e "${CYAN}Configuration of K8s Loadbalancer node ${GREEN}[$lbname]${CYAN} is ${GREEN}completed${NC}"
         #
         leader=$nsName"-kmaster1"
         k8sv="v1.14.2"
         certType="experimental-upload-certs"
-        cat template/mm-leader-config.sh > code/deploy-mm-leader.sh
-        sed -i -e "s/<k8s-version>/$k8sv/g" code/deploy-mm-leader.sh
-        sed -i -e "s/<lbip>/$lbip/g" code/deploy-mm-leader.sh
-        sed -i -e "s/<cert_type>/$certType/g" code/deploy-mm-leader.sh
+        cat $BUCKET_HOME/template/mm-leader-config.sh > $BUCKET_HOME/code/deploy-mm-leader.sh
+        sed -i -e "s/<k8s-version>/$k8sv/g" $BUCKET_HOME/code/deploy-mm-leader.sh
+        sed -i -e "s/<lbip>/$lbip/g" $BUCKET_HOME/code/deploy-mm-leader.sh
+        sed -i -e "s/<cert_type>/$certType/g" $BUCKET_HOME/code/deploy-mm-leader.sh
         #
         echo -e "${CYAN}Configuring K8s leader ${GREEN}[$leader]${NC}"
-        cat code/deploy-mm-leader.sh | lxc exec $leader bash
+        cat $BUCKET_HOME/code/deploy-mm-leader.sh | lxc exec $leader bash
         #
-        lxc exec $leader cat /etc/kubernetes/admin.conf > configs/k8s-admin.conf
+        lxc exec $leader cat /etc/kubernetes/admin.conf > $BUCKET_HOME/configs/k8s-admin.conf
         #cat configs/k8s-admin.conf > $HOME/.kube/config
-        lxc file push configs/k8s-admin.conf $clientName/root/.kube/config
-        rm -rf configs/k8s-admin.conf
-        lxc file pull $leader/joinmasters.sh configs/joinmasters.sh
-        lxc file pull $leader/joinworkers.sh configs/joinworkers.sh
-        lxc file push configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        lxc file push $BUCKET_HOME/configs/k8s-admin.conf $clientName/root/.kube/config
+        rm -rf $BUCKET_HOME/configs/k8s-admin.conf
+        lxc file pull $leader/joinmasters.sh $BUCKET_HOME/configs/joinmasters.sh
+        lxc file pull $leader/joinworkers.sh $BUCKET_HOME/configs/joinworkers.sh
+        lxc file push $BUCKET_HOME/configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
         #
         for (( c=2; c<=$nMaster; c++ )); do
             mname=$nsName"-kmaster"$c
             echo -e "${CYAN}Joining master node ${CYAN}[$mname] to the cluster${NC}"
-            lxc file push configs/joinmasters.sh $mname/joinmasters.sh
-            lxc file push configs/ca.crt $mname/etc/docker/certs.d/sys-dtr:5000/ca.crt
+            lxc file push $BUCKET_HOME/configs/joinmasters.sh $mname/joinmasters.sh
+            lxc file push $BUCKET_HOME/configs/ca.crt $mname/etc/docker/certs.d/sys-dtr:5000/ca.crt
             lxc exec $mname bash /joinmasters.sh &
         done
         #
         for (( c=1; c<=$nWorker; c++ )); do
             wname=$nsName"-kworker"$c
             echo -e "${CYAN}Joining worker node ${CYAN}[$wname] to the cluster${NC}"
-            lxc file push configs/joinworkers.sh $wname/joinworkers.sh
-            lxc file push configs/ca.crt $wname/etc/docker/certs.d/sys-dtr:5000/ca.crt
+            lxc file push $BUCKET_HOME/configs/joinworkers.sh $wname/joinworkers.sh
+            lxc file push $BUCKET_HOME/configs/ca.crt $wname/etc/docker/certs.d/sys-dtr:5000/ca.crt
             lxc exec $wname bash /joinworkers.sh &
         done
     fi
@@ -288,16 +288,16 @@ bucket_create_k8s(){
         sleep 5s
         echo -e "${CYAN}configuring NFS dynamic storage provisioner${NC}"
         nfsIP=$(lxc list $nfsName -c4 --format csv | grep eth0 | awk '{print $1}' | tr -d \")
-        lxc file push inside/nfsSC/default-sc.yaml $clientName/root/default-sc.yaml
-        lxc file push inside/nfsSC/rbac.yaml $clientName/root/rbac.yaml
-        cat inside/nfsSC/template/deployment.yaml > inside/nfsSC/deployment.yaml
-        sed -i "s/<nfsIP>/$nfsIP/g" inside/nfsSC/deployment.yaml
-        lxc file push inside/nfsSC/deployment.yaml $clientName/root/deployment.yaml
-        lxc file push inside/nfsSC/setupNFS.sh $clientName/root/setupNFS.sh
+        lxc file push $BUCKET_HOME/inside/nfsSC/default-sc.yaml $clientName/root/default-sc.yaml
+        lxc file push $BUCKET_HOME/inside/nfsSC/rbac.yaml $clientName/root/rbac.yaml
+        cat $BUCKET_HOME/inside/nfsSC/template/deployment.yaml > $BUCKET_HOME/inside/nfsSC/deployment.yaml
+        sed -i "s/<nfsIP>/$nfsIP/g" $BUCKET_HOME/inside/nfsSC/deployment.yaml
+        lxc file push $BUCKET_HOME/inside/nfsSC/deployment.yaml $clientName/root/deployment.yaml
+        lxc file push $BUCKET_HOME/inside/nfsSC/setupNFS.sh $clientName/root/setupNFS.sh
         sleep 1s
         lxc exec $clientName bash /root/setupNFS.sh #> /dev/null 2>&1
-        lxc file push examples/1-pvc-nfs.yaml $clientName/root/1-pvc-nfs.yaml 
-        lxc file push examples/2-busybox-pv-nfs.yaml $clientName/root/2-busybox-pv-nfs.yaml 
+        lxc file push $BUCKET_HOME/examples/1-pvc-nfs.yaml $clientName/root/1-pvc-nfs.yaml 
+        lxc file push $BUCKET_HOME/examples/2-busybox-pv-nfs.yaml $clientName/root/2-busybox-pv-nfs.yaml 
     fi
     #
     echo -e "${GREEN}Deployment Duration: $((($(date +%s)-$start)/60)) minutes${NC}"

@@ -24,7 +24,7 @@ bucket_create_nfs() {
     echo -e "${CYAN}Bucket created... setting up NFS.${NC}" ;
     #
     sleep 5s
-    cat inside/setup-nfs.sh | lxc exec $newNodeName bash
+    cat $BUCKET_HOME/inside/setup-nfs.sh | lxc exec $newNodeName bash
     #
     echo -e "${GREEN}NFS Share bucket [$newNodeName] created succesfully.${NC}" ;
     #

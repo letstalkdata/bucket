@@ -3,6 +3,7 @@ sudo snap install lxd
 sudo usermod -aG lxd $USER
 newgrp lxd
 sudo lxd --version
+sudo lxd init --auto
 #
 sudo apt install -y net-tools
 #

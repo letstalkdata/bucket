@@ -29,10 +29,10 @@ bucket_create_node(){
         echo -e "${GREEN}[sys] ${RED}namespace is reserved. Please provide another namespace to proceed. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Creating provided namespace.${NC}";
-        echo $nsName >> db/ns.csv
+        echo $nsName >> $BUCKET_HOME/db/ns.csv
         echo -e "${CYAN}New namespace ${GREEN}[$nsName]${CYAN} created ${NC}"   
     fi
     check2=$(case $profile in tiny|mini|regular1|regular2|heavy1|heavy2|heavy3) echo yes;; *)  echo no;; esac)
@@ -64,11 +64,11 @@ bucket_create_node(){
             if (( $withVolume > 0 )); then
                 echo -e "${CYAN}Setting up loopback device...${NC}"
                 #
-                cat preconfig/volumeInit.sh | lxc exec $nName bash
+                cat $BUCKET_HOME/preconfig/volumeInit.sh | lxc exec $nName bash
                 #
                 ldName=$(sudo losetup -f)
                 ldNo=$(echo $ldName | sed 's/\/dev\/loop//') 
-                imgName="loopDevice/loop-"$ldNo".img"
+                imgName=$BUCKET_HOME"/loopDevice/loop-"$ldNo".img"
                 volumeMB=$(($volumeGB * 1000))
                 cnt=$(($volumeMB / 100))
                 dd if=/dev/zero of=$imgName bs=100M count=$cnt
@@ -85,9 +85,9 @@ bucket_create_node(){
                 find1="<device>"
                 find2="<mountLocation>"
                 #
-                cat template/mount.sh > loopDevice/mount.sh
-                sed -i "s/<device>/$ldDeviceesc/g" loopDevice/mount.sh
-                sed -i "s/<mountLocation>/$mntLocesc/g" loopDevice/mount.sh
+                cat $BUCKET_HOME/template/mount.sh > $BUCKET_HOME/loopDevice/mount.sh
+                sed -i "s/<device>/$ldDeviceesc/g" $BUCKET_HOME/loopDevice/mount.sh
+                sed -i "s/<mountLocation>/$mntLocesc/g" $BUCKET_HOME/loopDevice/mount.sh
                 #
                 #cat loopDevice/mount.sh | lxc exec $nName bash
             fi
@@ -105,7 +105,7 @@ bucket_create_node(){
     for (( c=1; c<=$nodecount; c++ )) 
     do
         nodeName=$nsName"-node"$c
-        lxc file push preconfig/nodeInit.sh $nodeName/root/nodeInit.sh
+        lxc file push $BUCKET_HOME/preconfig/nodeInit.sh $nodeName/root/nodeInit.sh
     done
     nodeName=""
     for (( c=1; c<=$nodecount; c++ )) 
@@ -116,11 +116,11 @@ bucket_create_node(){
     echo -e "${GREEN}Nodes deployed successfully.${NC}"
     clientName=$nsName"-client"
     if (( $withClient > 0 )); then
-        lxc file pull sys-dtr/certs/ca.crt configs/ca.crt
+        lxc file pull sys-dtr/certs/ca.crt $BUCKET_HOME/configs/ca.crt
         echo -e "${CYAN}Deploying client node to access the nodes.${GREEN}[$clientName]${NC}"
         lxc copy $nodeTemplate $clientName --profile mini
         lxc start $clientName
-        lxc file push configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
+        lxc file push $BUCKET_HOME/configs/ca.crt $clientName/etc/docker/certs.d/sys-dtr:5000/ca.crt
         bucket_create_rope $clientName "webssh"
     fi
     #
@@ -138,14 +138,14 @@ bucket_delete_node() {
         echo -e "${GREEN}[default] ${RED}namespace can not be deleted. exiting...${NC}" ;
         exit 1;
     fi
-    check=$(cat db/ns.csv | grep "$nsName")
+    check=$(cat $BUCKET_HOME/db/ns.csv | grep "$nsName")
     if [[ ! $check ]]; then 
         echo -e "${GREEN}Namespace doesnot exists. Nothing to do.${NC}";
         exit 0;
     fi
     bucket=$(lxc list $nsName --format csv -c n)
     if [[ ! $bucket ]]; then 
-        sed -i "/$nsName/d" ./db/ns.csv
+        sed -i "/$nsName/d" $BUCKET_HOME/db/ns.csv
         echo -e "${GREEN}namespace [$nsName] deleted successfully.${NC}" ;
         exit 0;
     fi
@@ -160,13 +160,13 @@ bucket_delete_node() {
             lxc list $nsName --format csv -c n | while read -r line ; do
                 ldNo=$(lxc config device list $line | grep ldDisk | cut -d'-' -f2)
                 ldDevice="/dev/loop"$ldNo
-                img="loopDevice/loop-"$ldNo".img"
+                img=$BUCKET_HOME"/loopDevice/loop-"$ldNo".img"
                 sudo losetup -d $ldDevice
                 sudo rm -rf $ldDevice
                 rm -rf $img
             done
             lxc delete -f $(lxc list $nsName --format csv -c n)
-            sed -i "/$nsName/d" ./db/ns.csv
+            sed -i "/$nsName/d" $BUCKET_HOME/db/ns.csv
             echo -e "${GREEN}Namespace [$nsName] for node deployment deleted successfully.${NC}"
             ;;
         n|N ) 
