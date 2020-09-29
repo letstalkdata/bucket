@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-k8sVersion="1.14.9"
+k8sVersion="1.17.1"
 mkdir -p /root/.kube
 # Install docker from Docker-ce repository
 echo "[TASK 1] Install docker container engine"
 yum install -y -q yum-utils device-mapper-persistent-data lvm2 > /dev/null 2>&1
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo > /dev/null 2>&1
-yum install -y -q docker-ce-3:18* docker-ce-cli-1:18*>/dev/null 2>&1
+yum install -y -q docker-ce-3:19* docker-ce-cli-1:19*>/dev/null 2>&1
 #
 # Enable docker service
 echo "[TASK 2] Enable and start docker service"
