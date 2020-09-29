@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-k8sVersion="1.14.2"
+k8sVersion="1.17.1"
 # Start and Enable kubelet service
 echo "[TASK 1] Enable and start kubelet service"
 systemctl enable kubelet >/dev/null 2>&1
